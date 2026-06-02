@@ -1,6 +1,6 @@
 # state.md — icon.no v0
 
-**Actualizado:** 2026-06-03
+**Actualizado:** 2026-06-03 (sesión 4)
 
 ---
 
@@ -50,6 +50,17 @@
 ---
 
 ## History
+
+### 2026-06-03 — Engine coverage + polish (sesión 4)
+- Engine: added ©️ ®️ ™️, bidirectional arrows U+2194-U+2199, keycap sequences 0️⃣-9️⃣ #️⃣ *️⃣
+- Engine: extended range to U+1F2FF — covers 🈁🈚🈯🈲-🈺🉐🉑 and 🅰🅱🆎🆚
+- Engine: added box drawings U+2500-U+257F, block elements U+2580-U+259F, geometric shapes U+25A0-U+25FF
+- UI: removed diff/resultado toggle — preview always shows diff
+- UI: scroll-to-top button added
+- i18n: all UI strings and preset names translated to English
+- Refactor: internal states pendiente→pending, listo→done
+- Code: removed decorative ─ symbols from comments
+- Downloaded emoji-data.txt (Unicode 17.0) to .archive for future engine audits
 
 ### 2026-06-03 — Refactor + UX (sesión 3)
 - Motor y presets extraídos de index.html a `engine.js` y `presets.js` en raíz — sin duplicación
