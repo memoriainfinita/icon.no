@@ -10,7 +10,7 @@ const _BASE_CLASS = (
   '\u{1F900}-\u{1F9FF}' +
   '\u{1FA00}-\u{1FA6F}' +
   '\u{1FA70}-\u{1FAFF}' +
-  '\u{1F004}-\u{1F1FF}' +
+  '\u{1F004}-\u{1F2FF}' +
   '©®' +           // Copyright, registered U+00A9, U+00AE
   '™' +            // Trade mark U+2122
   '↔-↙' +         // Bidirectional/diagonal arrows U+2194-U+2199
