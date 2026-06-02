@@ -173,9 +173,9 @@ body {
 .card-icon { opacity:0.45; flex-shrink:0; }
 .card-name { flex:1; color:#777; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .card-status { font-size:0.61rem; padding:0.09rem 0.38rem; border-radius:3px; flex-shrink:0; }
-.s-pendiente { color:var(--text-faint); background:#141414; border:1px solid var(--border-2); }
+.s-pending { color:var(--text-faint); background:#141414; border:1px solid var(--border-2); }
 .s-preview   { color:#886633; background:#1a1500; border:1px solid #332800; }
-.s-listo     { color:var(--green); background:var(--green-bg); border:1px solid var(--green-border); }
+.s-done     { color:var(--green); background:var(--green-bg); border:1px solid var(--green-border); }
 .s-error     { color:var(--orange); background:var(--orange-bg); border:1px solid #5a2200; }
 .card-x { font-size:0.65rem; color:var(--text-faint); cursor:pointer; flex-shrink:0; line-height:1; padding:0.1rem 0.15rem; }
 .card-x:hover { color:#c66; }
@@ -567,7 +567,7 @@ function renderInputZone() {
     dropZone.classList.remove('drag-over');
     const dropped = Array.from(e.dataTransfer.files);
     for (const file of dropped) {
-      addCard({ type: 'file', id: 'card-' + Date.now() + '-' + file.name, name: file.name, file, content: null, state: 'pendiente' });
+      addCard({ type: 'file', id: 'card-' + Date.now() + '-' + file.name, name: file.name, file, content: null, state: 'pending' });
     }
   });
 
@@ -594,12 +594,12 @@ function handleAdd() {
     const base = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     const exists = cards.some(c => c.name.startsWith(`Text · ${base}`));
     const ts = exists ? `${base}:${String(now.getSeconds()).padStart(2,'0')}` : base;
-    addCard({ type: 'text', id: 'card-' + Date.now(), name: `Text · ${ts}`, content: text, state: 'pendiente' });
+    addCard({ type: 'text', id: 'card-' + Date.now(), name: `Text · ${ts}`, content: text, state: 'pending' });
     ta.value = '';
   }
 
   for (const file of _pendingFiles) {
-    addCard({ type: 'file', id: 'card-' + Date.now() + '-' + file.name, name: file.name, file, content: null, state: 'pendiente' });
+    addCard({ type: 'file', id: 'card-' + Date.now() + '-' + file.name, name: file.name, file, content: null, state: 'pending' });
   }
   _pendingFiles = [];
   document.getElementById('add-btn').disabled = true;
@@ -637,15 +637,15 @@ function renderCard(card) {
 }
 
 function statusLabel(state) {
-  return { pendiente: 'pending', preview: 'preview', listo: 'done', error: 'error' }[state] ?? state;
+  return { pending: 'pending', preview: 'preview', done: 'done', error: 'error' }[state] ?? state;
 }
 
 function renderCardBody(card) {
   if (card.state === 'error') {
     return `<div class="output" style="color:var(--red-dim)">${card.errorMsg ?? 'unsupported file'}</div>`;
   }
-  const showDownload = card.type === 'file' && card.state === 'listo';
-  const showCopy    = card.state === 'listo';
+  const showDownload = card.type === 'file' && card.state === 'done';
+  const showCopy    = card.state === 'done';
   const previewClass = card.state === 'preview' ? 'btn' : 'btn primary';
   const limpiarClass = card.state === 'preview' ? 'btn primary' : 'btn';
   return `
@@ -661,7 +661,7 @@ function renderCardBody(card) {
 
 function renderOutput(card) {
   if (!card.segments && !card.cleanContent) return '<span style="color:var(--text-faint)">— unprocessed —</span>';
-  if (card.state === 'listo') return escapeHtml(card.cleanContent ?? '');
+  if (card.state === 'done') return escapeHtml(card.cleanContent ?? '');
   if (card.state === 'preview') {
     return (card.segments ?? []).map(s => {
       if (s.type === 'plain') return escapeHtml(s.text);
@@ -720,7 +720,7 @@ function cleanCard(id) {
     readFileCard(id, (text) => {
       const preserve = buildPreserveSet(presets);
       const clean = cleanText(text, preserve);
-      cards = cards.map(c => c.id === id ? { ...c, content: text, cleanContent: clean, state: 'listo', segments: null } : c);
+      cards = cards.map(c => c.id === id ? { ...c, content: text, cleanContent: clean, state: 'done', segments: null } : c);
       renderCards();
       renderBulkBar();
     });
@@ -730,7 +730,7 @@ function cleanCard(id) {
   const text = card.content ?? '';
   const preserve = buildPreserveSet(presets);
   const clean = cleanText(text, preserve);
-  cards = cards.map(c => c.id === id ? { ...c, cleanContent: clean, state: 'listo', segments: null } : c);
+  cards = cards.map(c => c.id === id ? { ...c, cleanContent: clean, state: 'done', segments: null } : c);
   renderCards();
   renderBulkBar();
 }
@@ -747,7 +747,7 @@ function copyCard(id) {
 }
 
 function invalidatePreviewCards() {
-  cards = cards.map(c => c.state === 'preview' ? { ...c, state: 'pendiente', segments: null, cleanContent: null } : c);
+  cards = cards.map(c => c.state === 'preview' ? { ...c, state: 'pending', segments: null, cleanContent: null } : c);
   renderCards();
 }
 
@@ -806,17 +806,17 @@ function renderBulkBar() {
 }
 
 function previewAll() {
-  const previewable = cards.filter(c => c.state === 'pendiente' || c.state === 'listo');
+  const previewable = cards.filter(c => c.state === 'pending' || c.state === 'done');
   for (const card of previewable) previewCard(card.id);
 }
 
 function processAll() {
-  const toProcess = cards.filter(c => c.state === 'pendiente' || c.state === 'preview');
+  const toProcess = cards.filter(c => c.state === 'pending' || c.state === 'preview');
   for (const card of toProcess) cleanCard(card.id);
 }
 
 function downloadReady() {
-  const ready = cards.filter(c => c.type === 'file' && c.state === 'listo' && c.cleanContent);
+  const ready = cards.filter(c => c.type === 'file' && c.state === 'done' && c.cleanContent);
   if (ready.length === 0) return;
 
   if (ready.length === 1) {
