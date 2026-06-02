@@ -44,10 +44,10 @@
 
 ## TODO
 
-- [ ] Ejecutar plan: `docs/superpowers/plans/2026-06-02-emoji-cleaner-webapp.md`
-  - Task 0: git init
-  - Tasks 1–2: motor de emojis (TDD)
-  - Task 3: modelo de presets (TDD)
+- [ ] Implementar: `docs/superpowers/plans/2026-06-02-emoji-cleaner-webapp.md`
+  - **Arrancar por Task 1** — Task 0 (git init) ya completado
+  - Tasks 1–2: motor de emojis (TDD, Node.js)
+  - Task 3: modelo de presets (TDD, Node.js)
   - Task 4: HTML skeleton + CSS
   - Tasks 5–6: config panel + editor de presets
   - Task 7: input zone
