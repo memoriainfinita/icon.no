@@ -51,6 +51,13 @@
 
 ## History
 
+### 2026-06-03 — Engine coverage cont. (sesión 5)
+- Engine: detect digit/symbol + VS16 without keycap (#️ *️ 0️-9️)
+- Engine: all keycap variants now covered (digit+VS16, digit+keycap, digit+VS16+keycap)
+- Engine: Japanese buttons U+1F200-U+1F2FF gap closed (🈁🈚🈯🈲-🈺🉐🉑 🅰🅱🆎🆚)
+- Engine: ©️ ®️ ™️ bidirectional arrows U+2194-U+2199 added
+- Reference: emoji-data.txt (Unicode 17.0) used as audit source, in .archive/
+
 ### 2026-06-03 — Engine coverage + polish (sesión 4)
 - Engine: added ©️ ®️ ™️, bidirectional arrows U+2194-U+2199, keycap sequences 0️⃣-9️⃣ #️⃣ *️⃣
 - Engine: extended range to U+1F2FF — covers 🈁🈚🈯🈲-🈺🉐🉑 and 🅰🅱🆎🆚
