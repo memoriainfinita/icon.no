@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>emoji-cleaner — Layout C v3</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #111; color: #ccc; padding: 2rem; }
+  h1 { color: #fff; font-size: 1rem; margin-bottom: 0.3rem; }
+  .subtitle { color: #555; font-size: 0.8rem; margin-bottom: 2rem; }
+  .row { display: flex; gap: 2.5rem; flex-wrap: wrap; align-items: flex-start; }
+  .col { flex: 1; min-width: 320px; max-width: 440px; }
+  .col-title { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+
+  .app { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; }
+  .app-header { padding: 0.9rem 1rem 0; display: flex; align-items: center; justify-content: space-between; }
+  .app-name { font-size: 0.75rem; color: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+  .mode-toggle { display: inline-flex; border: 1px solid #2a2a2a; border-radius: 6px; overflow: hidden; font-size: 0.75rem; }
+  .mode-toggle span { padding: 0.3rem 0.9rem; color: #555; }
+  .mode-toggle span.active { background: #252525; color: #ddd; }
+  .app-body { padding: 0.9rem 1rem 1rem; }
+
+  /* CONFIG PANEL */
+  .config-panel { border: 1px solid #252525; border-radius: 6px; margin-bottom: 0.8rem; overflow: hidden; }
+  .config-header { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0.7rem; background: #151515; font-size: 0.7rem; color: #555; cursor: pointer; }
+  .config-body { padding: 0.7rem; background: #151515; border-top: 1px solid #1e1e1e; }
+  .preset-list { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.5rem; }
+  .preset-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.5rem; border-radius: 5px; border: 1px solid #222; background: #1a1a1a; font-size: 0.73rem; }
+  .preset-row.on { border-color: #2a3e2a; background: #161e16; }
+  .pt { width: 26px; height: 14px; border-radius: 7px; border: 1px solid #333; background: #222; flex-shrink: 0; position: relative; }
+  .pt.on { background: #2a4a2a; border-color: #3a6a3a; }
+  .pt.on::after { content:''; position:absolute; right:2px; top:2px; width:8px; height:8px; border-radius:50%; background:#6a9; }
+  .pt.off::after { content:''; position:absolute; left:2px; top:2px; width:8px; height:8px; border-radius:50%; background:#333; }
+  .pname { color: #777; width: 68px; flex-shrink: 0; }
+  .preset-row.on .pname { color: #999; }
+  .pemojis { flex: 1; font-size: 0.88rem; opacity: 0.5; letter-spacing: 0.05em; }
+  .preset-row.on .pemojis { opacity: 1; }
+  .pedit { font-size: 0.63rem; color: #2e2e2e; cursor: pointer; }
+  .add-preset { font-size: 0.7rem; color: #333; cursor: pointer; padding: 0.15rem 0.5rem; }
+
+  /* TEXTAREA MODE */
+  .mock-ta { background: #111; border: 1px solid #222; border-radius: 6px; padding: 0.6rem 0.7rem; font-size: 0.75rem; color: #555; min-height: 75px; font-family: monospace; line-height: 1.7; margin-bottom: 0.6rem; }
+  .btn-row { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; flex-wrap: wrap; align-items: center; }
+  .btn { padding: 0.28rem 0.7rem; border-radius: 4px; font-size: 0.71rem; border: 1px solid #2a2a2a; background: #1e1e1e; color: #888; cursor: pointer; }
+  .btn.primary { border-color: #3a5a3a; background: #1a261a; color: #7cb87c; }
+  .view-toggle { display: inline-flex; border: 1px solid #222; border-radius: 4px; overflow: hidden; font-size: 0.66rem; margin-left: auto; }
+  .view-toggle span { padding: 0.18rem 0.55rem; color: #3a3a3a; }
+  .view-toggle span.active { background: #222; color: #999; }
+  .mock-out { background: #111; border: 1px solid #1e1e1e; border-radius: 6px; padding: 0.6rem 0.7rem; font-size: 0.78rem; font-family: monospace; line-height: 1.8; }
+  .del { background: #3a1200; color: #cc6633; border-radius: 3px; padding: 0 2px; text-decoration: line-through; text-decoration-color: #cc4400; }
+  .keep { background: #0d2010; color: #5a9; border-radius: 3px; padding: 0 2px; outline: 1px solid #1e3a20; }
+  .plain { color: #888; }
+
+  /* DROP ZONE */
+  .drop-zone { border: 1px dashed #2a2a2a; border-radius: 6px; padding: 1rem; text-align: center; font-size: 0.75rem; color: #333; margin-bottom: 0.7rem; }
+
+  /* FILE CARDS */
+  .file-stack { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.6rem; }
+
+  .file-card { border: 1px solid #252525; border-radius: 7px; overflow: hidden; }
+  .file-card-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.65rem; background: #161616; border-bottom: 1px solid #222; font-size: 0.73rem; cursor: pointer; }
+  .fc-name { flex: 1; color: #888; }
+  .fc-status { font-size: 0.62rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
+  .s-pending { color: #383838; background: #141414; border: 1px solid #1e1e1e; }
+  .s-done { color: #4a8; background: #0d1e0d; border: 1px solid #1a3a1a; }
+  .fc-chevron { font-size: 0.6rem; color: #333; }
+  .file-card-body { padding: 0.65rem; background: #141414; }
+
+  /* Collapsed card */
+  .file-card.collapsed .file-card-body { display: none; }
+  .file-card.collapsed .file-card-header { border-bottom: none; }
+
+  /* Bulk bar */
+  .bulk-bar { display: flex; gap: 0.4rem; padding-top: 0.3rem; }
+</style>
+</head>
+<body>
+
+<h1>emoji-cleaner — Layout C v3</h1>
+<p class="subtitle">Flujo unificado: archivos como tarjetas colapsables con el mismo ciclo que texto. ¿Cuadra?</p>
+
+<div class="row">
+
+  <!-- MODO TEXTO -->
+  <div class="col">
+    <div class="col-title">Modo texto</div>
+    <div class="app">
+      <div class="app-header">
+        <span class="app-name">emoji-cleaner</span>
+        <div class="mode-toggle"><span class="active">Texto</span><span>Archivos</span></div>
+      </div>
+      <div class="app-body">
+        <div class="config-panel">
+          <div class="config-header"><span>⚙ Preservar emojis</span><span>▲</span></div>
+          <div class="config-body">
+            <div class="preset-list">
+              <div class="preset-row on"><div class="pt on"></div><span class="pname">Estado</span><span class="pemojis">✅ ❌</span><span class="pedit">editar</span></div>
+              <div class="preset-row on"><div class="pt on"></div><span class="pname">Semáforo</span><span class="pemojis">🟢 🔴 🟡</span><span class="pedit">editar</span></div>
+              <div class="preset-row on"><div class="pt on"></div><span class="pname">Alertas</span><span class="pemojis">ℹ️ ⚠️</span><span class="pedit">editar</span></div>
+              <div class="preset-row"><div class="pt off"></div><span class="pname">Flechas</span><span class="pemojis">➡️ ⬆️ ⬇️ ↩️</span><span class="pedit">editar</span></div>
+            </div>
+            <div class="add-preset">+ nuevo preset</div>
+          </div>
+        </div>
+        <div class="mock-ta">Revisa los cambios 🚀✨<br>✅ Tests pasando — build 🟢<br>❌ Lint warnings ⚠️<br>¡Listo! 🎉🎊 Desplegado 🚀</div>
+        <div class="btn-row">
+          <button class="btn primary">Preview</button>
+          <button class="btn">Limpiar</button>
+          <button class="btn">Copiar</button>
+          <div class="view-toggle"><span class="active">diff</span><span>resultado</span></div>
+        </div>
+        <div class="mock-out">
+          <span class="plain">Revisa los cambios </span><span class="del">🚀</span><span class="del">✨</span><br>
+          <span class="keep">✅</span><span class="plain"> Tests pasando — build </span><span class="keep">🟢</span><br>
+          <span class="keep">❌</span><span class="plain"> Lint warnings </span><span class="keep">⚠️</span><br>
+          <span class="plain">¡Listo! </span><span class="del">🎉</span><span class="del">🎊</span><span class="plain"> Desplegado </span><span class="del">🚀</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODO ARCHIVOS -->
+  <div class="col">
+    <div class="col-title">Modo archivos — tarjetas unificadas</div>
+    <div class="app">
+      <div class="app-header">
+        <span class="app-name">emoji-cleaner</span>
+        <div class="mode-toggle"><span>Texto</span><span class="active">Archivos</span></div>
+      </div>
+      <div class="app-body">
+
+        <div class="config-panel">
+          <div class="config-header"><span>⚙ Preservar emojis</span><span>▼</span></div>
+        </div>
+
+        <div class="drop-zone">Arrastra archivos aquí · o haz clic</div>
+
+        <div class="file-stack">
+
+          <!-- Archivo 1 — expandido, con diff activo -->
+          <div class="file-card">
+            <div class="file-card-header">
+              <span class="fc-name">output-gpt.txt</span>
+              <span class="fc-status s-done">listo</span>
+              <span class="fc-chevron">▲</span>
+            </div>
+            <div class="file-card-body">
+              <div class="btn-row">
+                <button class="btn primary">Preview</button>
+                <button class="btn">Limpiar</button>
+                <button class="btn">⬇ Descargar</button>
+                <div class="view-toggle"><span class="active">diff</span><span>resultado</span></div>
+              </div>
+              <div class="mock-out" style="font-size:0.72rem">
+                <span class="plain">Deploy notes </span><span class="del">🚀</span><span class="del">✨</span><br>
+                <span class="keep">✅</span><span class="plain"> Checks passed</span><br>
+                <span class="plain">See ya! </span><span class="del">👋</span><span class="del">🎊</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Archivo 2 — expandido, pendiente -->
+          <div class="file-card">
+            <div class="file-card-header">
+              <span class="fc-name">notas-reunion.md</span>
+              <span class="fc-status s-pending">pendiente</span>
+              <span class="fc-chevron">▲</span>
+            </div>
+            <div class="file-card-body">
+              <div class="btn-row">
+                <button class="btn primary">Preview</button>
+                <button class="btn">Limpiar</button>
+                <button class="btn" style="color:#333;border-color:#1e1e1e">⬇ Descargar</button>
+              </div>
+              <div class="mock-out" style="color:#333;font-size:0.72rem;min-height:40px">
+                — sin procesar —
+              </div>
+            </div>
+          </div>
+
+          <!-- Archivo 3 — colapsado -->
+          <div class="file-card collapsed">
+            <div class="file-card-header">
+              <span class="fc-name">changelog-v3.txt</span>
+              <span class="fc-status s-pending">pendiente</span>
+              <span class="fc-chevron">▼</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bulk bar -->
+        <div class="bulk-bar">
+          <button class="btn">▶ Procesar todos</button>
+          <button class="btn">⬇ Descargar listos (.zip)</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

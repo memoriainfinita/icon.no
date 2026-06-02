@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>emoji-cleaner — editor de presets</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #111; color: #ccc; padding: 2rem; }
+  h1 { color: #fff; font-size: 1rem; margin-bottom: 0.3rem; }
+  .subtitle { color: #555; font-size: 0.8rem; margin-bottom: 2rem; }
+  .cols { display: flex; gap: 2.5rem; flex-wrap: wrap; align-items: flex-start; }
+  .col { flex: 1; min-width: 300px; max-width: 400px; }
+  .col-title { font-size: 0.7rem; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+
+  .panel { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; }
+  .panel-header { padding: 0.7rem 0.9rem; background: #151515; border-bottom: 1px solid #1e1e1e; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: #555; }
+  .panel-body { padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.35rem; }
+
+  /* PRESET ROW — normal */
+  .preset-row { border: 1px solid #222; border-radius: 6px; overflow: hidden; }
+  .preset-row.on { border-color: #2a3e2a; }
+
+  .pr-head { display: flex; align-items: center; gap: 0.5rem; padding: 0.32rem 0.55rem; background: #181818; font-size: 0.72rem; }
+  .preset-row.on .pr-head { background: #161e16; }
+  .pt { width: 26px; height: 14px; border-radius: 7px; border: 1px solid #333; background: #222; flex-shrink: 0; position: relative; cursor: pointer; }
+  .pt.on { background: #2a4a2a; border-color: #3a6a3a; }
+  .pt.on::after { content:''; position:absolute; right:2px; top:2px; width:8px; height:8px; border-radius:50%; background:#6a9; }
+  .pt.off::after { content:''; position:absolute; left:2px; top:2px; width:8px; height:8px; border-radius:50%; background:#333; }
+  .pname { flex: 1; color: #666; }
+  .preset-row.on .pname { color: #999; }
+  .pemojis { font-size: 0.88rem; opacity: 0.45; letter-spacing: 0.05em; }
+  .preset-row.on .pemojis { opacity: 1; }
+  .pedit { font-size: 0.62rem; color: #333; cursor: pointer; padding: 0.1rem 0.3rem; border-radius: 3px; border: 1px solid transparent; }
+  .pedit:hover { color: #666; border-color: #2a2a2a; }
+
+  /* PRESET ROW — edit mode (expanded) */
+  .pr-edit-body { padding: 0.6rem 0.6rem; background: #121212; border-top: 1px solid #1e1e1e; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .edit-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; }
+  .edit-label { color: #3a3a3a; width: 52px; flex-shrink: 0; }
+  .mock-input { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.72rem; color: #aaa; flex: 1; font-family: inherit; }
+  .mock-input.name-input { max-width: 130px; }
+
+  /* emoji chips editable */
+  .emoji-chips-edit { display: flex; flex-wrap: wrap; gap: 0.3rem; flex: 1; }
+  .echip { display: inline-flex; align-items: center; gap: 0.2rem; padding: 0.18rem 0.4rem; border-radius: 4px; border: 1px solid #2a3a2a; background: #161e16; font-size: 0.88rem; cursor: default; }
+  .echip .x { font-size: 0.6rem; color: #3a5a3a; cursor: pointer; line-height: 1; }
+  .echip .x:hover { color: #c66; }
+  .add-emoji-wrap { display: flex; align-items: center; gap: 0.4rem; }
+  .mock-emoji-input { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; padding: 0.22rem 0.45rem; font-size: 0.88rem; width: 52px; text-align: center; color: #777; }
+  .btn-add-emoji { font-size: 0.66rem; padding: 0.22rem 0.5rem; border-radius: 4px; border: 1px solid #2a2a2a; background: #1e1e1e; color: #555; cursor: pointer; }
+  .btn-add-emoji:hover { color: #999; }
+
+  .edit-actions { display: flex; gap: 0.4rem; align-items: center; }
+  .btn-save { font-size: 0.68rem; padding: 0.24rem 0.7rem; border-radius: 4px; border: 1px solid #3a5a3a; background: #1a261a; color: #7cb87c; cursor: pointer; }
+  .btn-cancel { font-size: 0.68rem; padding: 0.24rem 0.6rem; border-radius: 4px; border: 1px solid #2a2a2a; background: transparent; color: #444; cursor: pointer; }
+  .btn-delete { font-size: 0.65rem; padding: 0.24rem 0.6rem; border-radius: 4px; border: 1px solid #3a1a1a; background: transparent; color: #633; cursor: pointer; margin-left: auto; }
+  .btn-delete:hover { color: #c66; border-color: #633; }
+
+  /* NEW PRESET */
+  .new-preset { border: 1px dashed #252525; border-radius: 6px; overflow: hidden; }
+  .new-preset .pr-edit-body { background: #131313; }
+
+  /* ADD PRESET BTN */
+  .add-preset-btn { font-size: 0.7rem; color: #2e2e2e; cursor: pointer; padding: 0.3rem 0.5rem; border-radius: 5px; border: 1px dashed #222; text-align: center; }
+  .add-preset-btn:hover { color: #555; border-color: #333; }
+</style>
+</head>
+<body>
+
+<h1>emoji-cleaner — editor de presets</h1>
+<p class="subtitle">Tres estados: normal, editando preset existente, creando preset nuevo.</p>
+
+<div class="cols">
+
+  <!-- LISTA NORMAL -->
+  <div class="col">
+    <div class="col-title">Lista normal</div>
+    <div class="panel">
+      <div class="panel-header"><span>⚙ Preservar emojis</span><span>▲</span></div>
+      <div class="panel-body">
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Estado</span>
+            <span class="pemojis">✅ ❌</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Semáforo</span>
+            <span class="pemojis">🟢 🔴 🟡</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Alertas</span>
+            <span class="pemojis">ℹ️ ⚠️</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="preset-row">
+          <div class="pr-head">
+            <div class="pt off"></div>
+            <span class="pname">Flechas</span>
+            <span class="pemojis">➡️ ⬆️ ⬇️ ↩️</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="add-preset-btn">+ nuevo preset</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDITANDO PRESET EXISTENTE -->
+  <div class="col">
+    <div class="col-title">Editando "Alertas" (click en editar)</div>
+    <div class="panel">
+      <div class="panel-header"><span>⚙ Preservar emojis</span><span>▲</span></div>
+      <div class="panel-body">
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Estado</span>
+            <span class="pemojis">✅ ❌</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Semáforo</span>
+            <span class="pemojis">🟢 🔴 🟡</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <!-- EDITANDO ESTE -->
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname" style="color:#aaa">Alertas</span>
+            <span class="pemojis">ℹ️ ⚠️</span>
+            <span class="pedit" style="color:#555;border-color:#2a2a2a">editar</span>
+          </div>
+          <div class="pr-edit-body">
+            <div class="edit-row">
+              <span class="edit-label">Nombre</span>
+              <input class="mock-input name-input" value="Alertas" readonly>
+            </div>
+            <div class="edit-row" style="align-items:flex-start">
+              <span class="edit-label" style="padding-top:0.3rem">Emojis</span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:0.4rem">
+                <div class="emoji-chips-edit">
+                  <span class="echip">ℹ️ <span class="x">✕</span></span>
+                  <span class="echip">⚠️ <span class="x">✕</span></span>
+                </div>
+                <div class="add-emoji-wrap">
+                  <input class="mock-emoji-input" placeholder="🔔" readonly>
+                  <button class="btn-add-emoji">+ añadir</button>
+                </div>
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save">Guardar</button>
+              <button class="btn-cancel">Cancelar</button>
+              <button class="btn-delete">Eliminar preset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="preset-row">
+          <div class="pr-head">
+            <div class="pt off"></div>
+            <span class="pname">Flechas</span>
+            <span class="pemojis">➡️ ⬆️ ⬇️ ↩️</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="add-preset-btn">+ nuevo preset</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUEVO PRESET -->
+  <div class="col">
+    <div class="col-title">Creando nuevo preset</div>
+    <div class="panel">
+      <div class="panel-header"><span>⚙ Preservar emojis</span><span>▲</span></div>
+      <div class="panel-body">
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Estado</span>
+            <span class="pemojis">✅ ❌</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Semáforo</span>
+            <span class="pemojis">🟢 🔴 🟡</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <div class="preset-row on">
+          <div class="pr-head">
+            <div class="pt on"></div>
+            <span class="pname">Alertas</span>
+            <span class="pemojis">ℹ️ ⚠️</span>
+            <span class="pedit">editar</span>
+          </div>
+        </div>
+
+        <!-- NUEVO -->
+        <div class="new-preset">
+          <div class="pr-edit-body">
+            <div class="edit-row">
+              <span class="edit-label">Nombre</span>
+              <input class="mock-input name-input" placeholder="Mi preset" readonly>
+            </div>
+            <div class="edit-row" style="align-items:flex-start">
+              <span class="edit-label" style="padding-top:0.3rem">Emojis</span>
+              <div style="flex:1;display:flex;flex-direction:column;gap:0.4rem">
+                <div class="emoji-chips-edit" style="min-height:1.5rem;color:#2a2a2a;font-size:0.7rem">
+                  sin emojis aún
+                </div>
+                <div class="add-emoji-wrap">
+                  <input class="mock-emoji-input" placeholder="🔔" readonly>
+                  <button class="btn-add-emoji">+ añadir</button>
+                </div>
+              </div>
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save">Guardar</button>
+              <button class="btn-cancel">Cancelar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="add-preset-btn">+ nuevo preset</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
