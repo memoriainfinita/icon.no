@@ -42,7 +42,7 @@
 
 ## TODO
 
-- [ ] Considerar mejoras futuras si surgen en uso real
+- [ ] Feature: "custom delete rules" — user-defined list of characters/patterns to also delete, not just preserve. Currently the user only controls what survives; they have no control over what gets targeted.
 
 ---
 

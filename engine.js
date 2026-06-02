@@ -27,6 +27,9 @@ const _BASE_CLASS = (
   '➕-➗➡➰➿⤴-⤵' +
   '⬅-⬇⬛-⬜⭐⭕' +
   '↩↪' +
+  '─-╿' +   // Box drawings U+2500-U+257F
+  '▀-▟' +   // Block elements U+2580-U+259F
+  '■-◿' +   // Geometric shapes U+25A0-U+25FF
   '〰〽㊗㊙'
 );
 
