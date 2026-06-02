@@ -103,7 +103,6 @@ body {
 /* ── Btn row ── */
 .btn-row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 
-
 /* ── Output area ── */
 .output {
   background: var(--bg-4);
@@ -216,10 +215,10 @@ body {
 #scroll-top.visible { opacity: 1; pointer-events: auto; }
 #scroll-top:hover { color: var(--text); border-color: #444; }
 </style>
-</head>
-<body>
 <script src="engine.js"></script>
 <script src="presets.js"></script>
+</head>
+<body>
 <div class="app">
   <div class="app-name">icon.no</div>
   <div class="panel collapsed" id="config-panel"></div>
@@ -328,12 +327,12 @@ function renderConfig() {
   const isCollapsed = panel.classList.contains('collapsed');
   panel.innerHTML = `
     <div class="panel-header" onclick="toggleConfig()">
-      <span>⚙ Preservar emojis</span>
+      <span>⚙ Preserve emojis</span>
       <span>${isCollapsed ? '▼' : '▲'}</span>
     </div>
     <div class="panel-body">
       <div id="preset-list"></div>
-      <div class="add-preset-btn" onclick="startNewPreset()">+ nuevo preset</div>
+      <div class="add-preset-btn" onclick="startNewPreset()">+ new preset</div>
     </div>`;
   renderPresetList();
 }
@@ -360,7 +359,7 @@ function renderPresetRow(p) {
         <div class="pt ${p.enabled ? 'on' : 'off'}" onclick="togglePreset('${p.id}')"></div>
         <span class="pname">${p.name}</span>
         <span class="pemojis">${p.emojis.join(' ')}</span>
-        <span class="pedit" onclick="editPreset('${p.id}')">editar</span>
+        <span class="pedit" onclick="editPreset('${p.id}')">edit</span>
       </div>
       ${isEditing ? renderPresetEditor(p) : ''}
     </div>`;
@@ -383,7 +382,7 @@ function renderPresetEditor(p) {
   return `
     <div class="pr-edit-body">
       <div class="edit-row">
-        <span class="edit-label">Nombre</span>
+        <span class="edit-label">Name</span>
         <input class="mock-input" id="edit-name-${p.id}" value="${p.name}">
       </div>
       <div class="edit-row" style="align-items:flex-start">
@@ -394,14 +393,14 @@ function renderPresetEditor(p) {
           </div>
           <div class="add-emoji-wrap">
             <input class="emoji-input" id="add-emoji-${p.id}" placeholder="🔔" maxlength="8">
-            <button class="btn" onclick="addEmojiToPreset('${p.id}')">+ añadir</button>
+            <button class="btn" onclick="addEmojiToPreset('${p.id}')">+ add</button>
           </div>
         </div>
       </div>
       <div class="edit-actions">
-        <button class="btn primary" onclick="savePresetEdit('${p.id}')">Guardar</button>
-        <button class="btn" onclick="cancelEdit()">Cancelar</button>
-        <button class="btn delete-btn" onclick="deletePreset('${p.id}')">Eliminar preset</button>
+        <button class="btn primary" onclick="savePresetEdit('${p.id}')">Save</button>
+        <button class="btn" onclick="cancelEdit()">Cancel</button>
+        <button class="btn delete-btn" onclick="deletePreset('${p.id}')">Delete preset</button>
       </div>
     </div>`;
 }
@@ -411,26 +410,26 @@ function renderNewPresetForm() {
     <div class="preset-row new-preset">
       <div class="pr-edit-body">
         <div class="edit-row">
-          <span class="edit-label">Nombre</span>
-          <input class="mock-input" id="new-preset-name" placeholder="Mi preset">
+          <span class="edit-label">Name</span>
+          <input class="mock-input" id="new-preset-name" placeholder="My preset">
         </div>
         <div class="edit-row" style="align-items:flex-start">
           <span class="edit-label" style="padding-top:0.3rem">Emojis</span>
           <div style="flex:1;display:flex;flex-direction:column;gap:0.4rem">
             <div class="emoji-chips-edit" id="new-preset-chips">
               ${_newPresetEmojis.length === 0
-                ? '<span style="font-size:0.7rem;color:var(--text-faint)">sin emojis aún</span>'
+                ? '<span style="font-size:0.7rem;color:var(--text-faint)">no emojis yet</span>'
                 : _newPresetEmojis.map(e => `<span class="echip">${e}<span class="x" onclick="removeNewPresetEmoji('${e}')">✕</span></span>`).join('')}
             </div>
             <div class="add-emoji-wrap">
               <input class="emoji-input" id="add-emoji-__new__" placeholder="🔔" maxlength="8">
-              <button class="btn" onclick="addEmojiToPreset('__new__')">+ añadir</button>
+              <button class="btn" onclick="addEmojiToPreset('__new__')">+ add</button>
             </div>
           </div>
         </div>
         <div class="edit-actions">
-          <button class="btn primary" onclick="saveNewPreset()">Guardar</button>
-          <button class="btn" onclick="cancelEdit()">Cancelar</button>
+          <button class="btn primary" onclick="saveNewPreset()">Save</button>
+          <button class="btn" onclick="cancelEdit()">Cancel</button>
         </div>
       </div>
     </div>`;
@@ -536,16 +535,16 @@ function renderInputZone() {
   zone.innerHTML = `
     <div class="input-zone" id="drop-zone">
       <div class="input-zone-header">
-        <span>Pega texto o arrastra archivos aquí</span>
+        <span>Paste text or drop files here</span>
         <label class="btn" style="cursor:pointer">
-          + archivos
+          + files
           <input type="file" multiple accept=".txt,.md,.js,.py,.json,.csv,.log,.html,.css,.xml,.yaml,text/*" style="display:none" id="file-input">
         </label>
       </div>
-      <textarea id="text-input" class="text-input" placeholder="Pega aquí..."></textarea>
+      <textarea id="text-input" class="text-input" placeholder="Paste here..."></textarea>
       <div id="pending-files"></div>
       <div class="input-zone-footer">
-        <button class="btn primary" id="add-btn" onclick="handleAdd()" disabled>Añadir →</button>
+        <button class="btn primary" id="add-btn" onclick="handleAdd()" disabled>Add →</button>
       </div>
     </div>`;
 
@@ -593,9 +592,9 @@ function handleAdd() {
   if (text.trim()) {
     const now = new Date();
     const base = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    const exists = cards.some(c => c.name.startsWith(`Texto · ${base}`));
+    const exists = cards.some(c => c.name.startsWith(`Text · ${base}`));
     const ts = exists ? `${base}:${String(now.getSeconds()).padStart(2,'0')}` : base;
-    addCard({ type: 'text', id: 'card-' + Date.now(), name: `Texto · ${ts}`, content: text, state: 'pendiente' });
+    addCard({ type: 'text', id: 'card-' + Date.now(), name: `Text · ${ts}`, content: text, state: 'pendiente' });
     ta.value = '';
   }
 
@@ -638,12 +637,12 @@ function renderCard(card) {
 }
 
 function statusLabel(state) {
-  return { pendiente: 'pendiente', preview: 'preview', listo: 'listo', error: 'error' }[state] ?? state;
+  return { pendiente: 'pending', preview: 'preview', listo: 'done', error: 'error' }[state] ?? state;
 }
 
 function renderCardBody(card) {
   if (card.state === 'error') {
-    return `<div class="output" style="color:var(--red-dim)">${card.errorMsg ?? 'archivo no compatible'}</div>`;
+    return `<div class="output" style="color:var(--red-dim)">${card.errorMsg ?? 'unsupported file'}</div>`;
   }
   const showDownload = card.type === 'file' && card.state === 'listo';
   const showCopy    = card.state === 'listo';
@@ -652,16 +651,16 @@ function renderCardBody(card) {
   return `
     <div class="btn-row">
       <button class="${previewClass}" onclick="previewCard('${card.id}')">Preview</button>
-      <button class="${limpiarClass}" onclick="cleanCard('${card.id}')">Limpiar</button>
-      ${showCopy    ? `<button class="btn" id="copy-btn-${card.id}" onclick="copyCard('${card.id}')">Copiar</button>` : ''}
-      ${showDownload ? `<button class="btn" onclick="downloadCard('${card.id}')">⬇ Descargar</button>` : ''}
-      ${!showCopy && !showDownload ? `<button class="btn" disabled>${card.type === 'text' ? 'Copiar' : '⬇ Descargar'}</button>` : ''}
+      <button class="${limpiarClass}" onclick="cleanCard('${card.id}')">Clean</button>
+      ${showCopy    ? `<button class="btn" id="copy-btn-${card.id}" onclick="copyCard('${card.id}')">Copy</button>` : ''}
+      ${showDownload ? `<button class="btn" onclick="downloadCard('${card.id}')">⬇ Download</button>` : ''}
+      ${!showCopy && !showDownload ? `<button class="btn" disabled>${card.type === 'text' ? 'Copy' : '⬇ Download'}</button>` : ''}
     </div>
     <div class="output" id="output-${card.id}">${renderOutput(card)}</div>`;
 }
 
 function renderOutput(card) {
-  if (!card.segments && !card.cleanContent) return '<span style="color:var(--text-faint)">— sin procesar —</span>';
+  if (!card.segments && !card.cleanContent) return '<span style="color:var(--text-faint)">— unprocessed —</span>';
   if (card.state === 'listo') return escapeHtml(card.cleanContent ?? '');
   if (card.state === 'preview') {
     return (card.segments ?? []).map(s => {
@@ -684,7 +683,6 @@ function deleteCard(e, id) {
   renderCards();
   renderBulkBar();
 }
-
 
 // ── Card cycle — text ─────────────────────────────────────────────────────────
 function previewCard(id) {
@@ -743,8 +741,8 @@ function copyCard(id) {
   navigator.clipboard.writeText(card.cleanContent).then(() => {
     const btn = document.getElementById(`copy-btn-${id}`);
     if (!btn) return;
-    btn.textContent = 'Copiado ✓';
-    setTimeout(() => { btn.textContent = 'Copiar'; }, 1500);
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
   });
 }
 
@@ -766,7 +764,7 @@ function readFileCard(id, callback) {
   if (!card || !card.file) return;
 
   if (!isAcceptedFile(card.file.name)) {
-    cards = cards.map(c => c.id === id ? { ...c, state: 'error', errorMsg: 'archivo no compatible' } : c);
+    cards = cards.map(c => c.id === id ? { ...c, state: 'error', errorMsg: 'unsupported file' } : c);
     renderCards();
     return;
   }
@@ -778,7 +776,7 @@ function readFileCard(id, callback) {
     callback(text);
   };
   reader.onerror = () => {
-    cards = cards.map(c => c.id === id ? { ...c, state: 'error', errorMsg: 'error al leer archivo' } : c);
+    cards = cards.map(c => c.id === id ? { ...c, state: 'error', errorMsg: 'error reading file' } : c);
     renderCards();
   };
   reader.readAsText(card.file, 'utf-8');
@@ -802,9 +800,9 @@ function renderBulkBar() {
   if (cards.length === 0) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML = `
-    <button class="btn" onclick="previewAll()">◉ Preview todas</button>
-    <button class="btn primary" onclick="processAll()">▶ Procesar todas</button>
-    <button class="btn" onclick="downloadReady()">⬇ Descargar listas (.zip)</button>`;
+    <button class="btn" onclick="previewAll()">◉ Preview all</button>
+    <button class="btn primary" onclick="processAll()">▶ Process all</button>
+    <button class="btn" onclick="downloadReady()">⬇ Download ready (.zip)</button>`;
 }
 
 function previewAll() {

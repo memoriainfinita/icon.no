@@ -1,10 +1,10 @@
 const STORAGE_KEY = 'emoji-cleaner-presets';
 
 const DEFAULT_PRESETS = [
-  { id: 'estado',   name: 'Estado',   emojis: ['✅', '❌'],             enabled: true },
-  { id: 'semaforo', name: 'Semáforo', emojis: ['🟢', '🔴', '🟡'],      enabled: true },
-  { id: 'alertas',  name: 'Alertas',  emojis: ['ℹ️', '⚠️'],            enabled: true },
-  { id: 'flechas',  name: 'Flechas',  emojis: ['➡️', '⬆️', '⬇️', '↩️'], enabled: false },
+  { id: 'estado',   name: 'Status',        emojis: ['✅', '❌'],             enabled: true },
+  { id: 'semaforo', name: 'Traffic light', emojis: ['🟢', '🔴', '🟡'],      enabled: true },
+  { id: 'alertas',  name: 'Alerts',        emojis: ['ℹ️', '⚠️'],            enabled: true },
+  { id: 'flechas',  name: 'Arrows',        emojis: ['➡️', '⬆️', '⬇️', '↩️'], enabled: false },
 ];
 
 function loadPresets() {
