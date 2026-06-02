@@ -1,3 +1,5 @@
+// Unicode 17.0 emoji ranges, ported from icono.py. Defines which base characters
+// the engine recognizes as emoji (before optional skin tone / VS16 / ZWJ).
 const _BASE_CLASS = (
   '\u{1F600}-\u{1F64F}' +
   '\u{1F300}-\u{1F5FF}' +
@@ -42,14 +44,14 @@ const EMOJI_RE = new RegExp(
 
 function detectEmojis(text, preserveSet = new Set()) {
   const results = [];
-  EMOJI_RE.lastIndex = 0;
+  EMOJI_RE.lastIndex = 0; // required: regex is shared with /g flag; without reset, next call continues from last match position
   let m;
   while ((m = EMOJI_RE.exec(text)) !== null) {
     results.push({
       start: m.index,
       end: m.index + m[0].length,
       emoji: m[0],
-      preserved: preserveSet.has(m[0]) || preserveSet.has(m[0].replace(/️$/, '')),
+      preserved: preserveSet.has(m[0]) || preserveSet.has(m[0].replace(/️$/, '')), // fallback: match emoji stored without VS16 (U+FE0F)
     });
   }
   return results;

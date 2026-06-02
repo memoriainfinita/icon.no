@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>icon.no</title>
 <style>
-/* ── Reset ── */
+/* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Tokens ── */
+/* Tokens */
 :root {
   --bg:        #111;
   --bg-2:      #1a1a1a;
@@ -32,7 +32,7 @@
   --radius-sm: 4px;
 }
 
-/* ── Base ── */
+/* Base */
 body {
   font-family: system-ui, sans-serif;
   background: var(--bg);
@@ -41,7 +41,7 @@ body {
   padding: 2rem 1rem;
 }
 
-/* ── Layout ── */
+/* Layout */
 .app {
   max-width: 680px;
   margin: 0 auto;
@@ -50,7 +50,7 @@ body {
   gap: 0.8rem;
 }
 
-/* ── App header ── */
+/* App header */
 .app-name {
   font-size: 0.7rem;
   color: var(--text-dim);
@@ -59,7 +59,7 @@ body {
   padding: 0.5rem 0;
 }
 
-/* ── Panels ── */
+/* Panels */
 .panel {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -84,7 +84,7 @@ body {
 .panel.collapsed .panel-body { display: none; }
 .panel.collapsed .panel-header { border-bottom: none; }
 
-/* ── Buttons ── */
+/* Buttons */
 .btn {
   padding: 0.28rem 0.7rem;
   border-radius: var(--radius-sm);
@@ -100,10 +100,10 @@ body {
 .btn.primary:hover { filter: brightness(1.1); }
 .btn:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 
-/* ── Btn row ── */
+/* Btn row */
 .btn-row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 
-/* ── Output area ── */
+/* Output area */
 .output {
   background: var(--bg-4);
   border: 1px solid var(--border-2);
@@ -117,11 +117,11 @@ body {
   min-height: 40px;
 }
 
-/* ── Diff spans ── */
+/* Diff spans */
 .del { background: var(--orange-bg); color: var(--orange); border-radius: 3px; padding: 0 2px; text-decoration: line-through; text-decoration-color: #cc4400; }
 .keep { background: var(--green-bg); color: var(--green); border-radius: 3px; padding: 0 2px; outline: 1px solid var(--green-border); }
 
-/* ── Preset list ── */
+/* Preset list */
 #preset-list { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.5rem; }
 .preset-row { border: 1px solid var(--border-2); border-radius: 5px; overflow: hidden; }
 .preset-row.on { border-color: #2a3e2a; }
@@ -140,7 +140,7 @@ body {
 .add-preset-btn { font-size:0.7rem; color:var(--text-faint); cursor:pointer; padding:0.25rem 0.5rem; border:1px dashed var(--border-2); border-radius:5px; text-align:center; margin-top:0.3rem; }
 .add-preset-btn:hover { color: var(--text-dim); border-color: var(--border); }
 
-/* ── Preset editor ── */
+/* Preset editor */
 .pr-edit-body { padding:0.6rem 0.6rem; background:#121212; border-top:1px solid var(--border-2); display:flex; flex-direction:column; gap:0.5rem; }
 .edit-row { display:flex; align-items:center; gap:0.5rem; font-size:0.7rem; }
 .edit-label { color:var(--text-faint); width:52px; flex-shrink:0; }
@@ -156,7 +156,7 @@ body {
 .delete-btn:hover { color:#c66; border-color:var(--red-dim); }
 .new-preset { border:1px dashed var(--border-2); }
 
-/* ── Input zone ── */
+/* Input zone */
 .input-zone { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition: border-color 0.15s; }
 .input-zone.drag-over { border-color: var(--green); }
 .input-zone-header { display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.75rem; background:var(--bg-3); border-bottom:1px solid var(--border-2); font-size:0.68rem; color:var(--text-faint); }
@@ -165,7 +165,7 @@ body {
 .text-input::placeholder { color: #333; }
 .input-zone-footer { display:flex; justify-content:flex-end; padding:0.35rem 0.75rem; background:var(--bg-3); border-top:1px solid var(--border-2); }
 
-/* ── Cards ── */
+/* Cards */
 #card-stack { display:flex; flex-direction:column; gap:0.5rem; }
 .card { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
 .card-header { display:flex; align-items:center; gap:0.45rem; padding:0.38rem 0.75rem; background:#161616; font-size:0.72rem; cursor:pointer; user-select:none; }
@@ -183,14 +183,14 @@ body {
 .card.collapsed .card-body { display:none; }
 .card-body { padding:0.65rem 0.75rem; background:#141414; display:flex; flex-direction:column; gap:0.5rem; }
 
-/* ── Pending files ── */
+/* Pending files */
 .pending-files-list { display:flex; flex-wrap:wrap; gap:0.35rem; padding:0.45rem 0.75rem; border-top:1px solid var(--border-2); background:var(--bg-4); }
 .pf-chip { font-size:0.68rem; color:var(--text-dim); background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.18rem 0.5rem; font-family:monospace; }
 
-/* ── Bulk bar ── */
+/* Bulk bar */
 #bulk-bar { display:flex; gap:0.4rem; flex-wrap:wrap; }
 
-/* ── Scroll-to-top ── */
+/* Scroll-to-top */
 #scroll-top {
   position: fixed;
   bottom: 1.5rem;
@@ -228,7 +228,7 @@ body {
 </div>
 <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">▲</button>
 <script>
-// ── ZIP writer ────────────────────────────────────────────────────────────────
+// ZIP writer
 function buildZip(files) {
   const enc = new TextEncoder();
   const parts = [];
@@ -309,19 +309,19 @@ function crc32(data) {
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
 
-// ── App state ─────────────────────────────────────────────────────────────────
+// App state
 let presets = loadPresets();
 let editingPresetId = null;
 let cards = [];
 let _newPresetEmojis = [];
 let _pendingFiles = [];
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// Helpers
 function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Config panel ──────────────────────────────────────────────────────────────
+// Config panel
 function renderConfig() {
   const panel = document.getElementById('config-panel');
   const isCollapsed = panel.classList.contains('collapsed');
@@ -377,7 +377,7 @@ function editPreset(id) {
   renderConfig();
 }
 
-// ── Preset editor ─────────────────────────────────────────────────────────────
+// Preset editor
 function renderPresetEditor(p) {
   return `
     <div class="pr-edit-body">
@@ -529,7 +529,7 @@ function flashDuplicate(el) {
   setTimeout(() => { el.style.outline = ''; }, 400);
 }
 
-// ── Input zone ────────────────────────────────────────────────────────────────
+// Input zone
 function renderInputZone() {
   const zone = document.getElementById('input-zone');
   zone.innerHTML = `
@@ -607,7 +607,7 @@ function handleAdd() {
   renderPendingFiles();
 }
 
-// ── Cards ─────────────────────────────────────────────────────────────────────
+// Cards
 function addCard(card) {
   cards.push(card);
   renderCards();
@@ -684,7 +684,7 @@ function deleteCard(e, id) {
   renderBulkBar();
 }
 
-// ── Card cycle — text ─────────────────────────────────────────────────────────
+// Card cycle — text
 function previewCard(id) {
   const card = cards.find(c => c.id === id);
   if (!card || card.state === 'error') return;
@@ -751,7 +751,7 @@ function invalidatePreviewCards() {
   renderCards();
 }
 
-// ── Card cycle — file ─────────────────────────────────────────────────────────
+// Card cycle — file
 const ACCEPTED_EXTENSIONS = new Set(['.txt','.md','.js','.py','.json','.csv','.log','.html','.css','.xml','.yaml']);
 
 function isAcceptedFile(filename) {
@@ -794,7 +794,7 @@ function downloadCard(id) {
   URL.revokeObjectURL(url);
 }
 
-// ── Bulk bar ──────────────────────────────────────────────────────────────────
+// Bulk bar
 function renderBulkBar() {
   const bar = document.getElementById('bulk-bar');
   if (cards.length === 0) { bar.style.display = 'none'; return; }
@@ -837,7 +837,7 @@ function downloadReady() {
   URL.revokeObjectURL(url);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// Init
 renderConfig();
 renderInputZone();
 window.addEventListener('scroll', () => {
