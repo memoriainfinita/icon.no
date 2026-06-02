@@ -212,8 +212,8 @@ body {
   <div class="app-name">icon.no</div>
   <div class="panel collapsed" id="config-panel"></div>
   <div id="input-zone"></div>
-  <div id="card-stack"></div>
   <div id="bulk-bar" style="display:none"></div>
+  <div id="card-stack"></div>
 </div>
 <script>
 // ── ZIP writer ────────────────────────────────────────────────────────────────
@@ -742,7 +742,7 @@ function renderCardBody(card) {
     return `<div class="output" style="color:var(--red-dim)">${card.errorMsg ?? 'archivo no compatible'}</div>`;
   }
   const showDownload = card.type === 'file' && card.state === 'listo';
-  const showCopy    = card.type === 'text' && card.state === 'listo';
+  const showCopy    = card.state === 'listo';
   const showToggle  = card.state === 'preview';
   const previewClass = card.state === 'preview' ? 'btn' : 'btn primary';
   const limpiarClass = card.state === 'preview' ? 'btn primary' : 'btn';
@@ -915,8 +915,8 @@ function renderBulkBar() {
 }
 
 function previewAll() {
-  const pending = cards.filter(c => c.state === 'pendiente');
-  for (const card of pending) previewCard(card.id);
+  const previewable = cards.filter(c => c.state === 'pendiente' || c.state === 'listo');
+  for (const card of previewable) previewCard(card.id);
 }
 
 function processAll() {

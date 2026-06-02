@@ -53,6 +53,11 @@
 
 ## History
 
+### 2026-06-02 — Mejoras post-implementación (sesión 2)
+- Copiar disponible también en cards de archivo (antes solo en texto)
+- previewAll ahora incluye cards en estado "listo", no solo "pendiente"
+- Bulk bar movido encima del card stack (orden lógico: controles → contenido)
+
 ### 2026-06-02 — Implementación completa + fixes + UX
 
 **Implementación (Tasks 1–12):**
