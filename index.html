@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>emoji-cleaner</title>
+<title>icon.no</title>
 <style>
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -209,7 +209,7 @@ body {
 </head>
 <body>
 <div class="app">
-  <div class="app-name">emoji-cleaner</div>
+  <div class="app-name">icon.no</div>
   <div class="panel collapsed" id="config-panel"></div>
   <div id="input-zone"></div>
   <div id="card-stack"></div>
@@ -909,8 +909,14 @@ function renderBulkBar() {
   if (cards.length === 0) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
   bar.innerHTML = `
-    <button class="btn" onclick="processAll()">▶ Procesar todas</button>
+    <button class="btn" onclick="previewAll()">◉ Preview todas</button>
+    <button class="btn primary" onclick="processAll()">▶ Procesar todas</button>
     <button class="btn" onclick="downloadReady()">⬇ Descargar listas (.zip)</button>`;
+}
+
+function previewAll() {
+  const pending = cards.filter(c => c.state === 'pendiente');
+  for (const card of pending) previewCard(card.id);
 }
 
 function processAll() {
