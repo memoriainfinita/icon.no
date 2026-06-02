@@ -1,0 +1,13 @@
+# CLI descartado
+emoji-cleaner.js
+.emoji-cleaner-config.json
+
+# Archivos sueltos de prueba
+test.md
+test.txt.md
+
+# Brainstorm sessions
+.superpowers/
+
+# Node
+node_modules/
