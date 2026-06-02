@@ -40,14 +40,14 @@ const SKIN_TONE = '\u{1F3FB}-\u{1F3FF}';
 const VS16      = '️';
 const ZWJ       = '\u{200D}';
 
-const KEYCAP = '⃣'; // combining enclosing keycap — only valid after 0-9, #, *
+const KEYCAP = '⃣'; // combining enclosing keycap U+20E3
 
 const EMOJI_RE = new RegExp(
   `(?:[${_BASE_CLASS}])` +
   `(?:[${SKIN_TONE}])?` +
   `(?:${VS16})?` +
   `(?:${ZWJ}(?:[${_BASE_CLASS}])(?:[${SKIN_TONE}])?(?:${VS16})?)*` +
-  `|[0-9#*]${VS16}?${KEYCAP}`, // keycap sequences: 0️⃣–9️⃣ #️⃣ *️⃣
+  `|[0-9#*](?:${VS16}${KEYCAP}?|${KEYCAP})`, // digit/symbol + VS16 and/or keycap: #️ *️ 0️–9️ and #️⃣ *️⃣ 0️⃣–9️⃣
   'gu'
 );
 
