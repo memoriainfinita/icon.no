@@ -24,6 +24,7 @@ const _BASE_CLASS = (
   '✳-✴❄❇❌❎❓-❕❗❣-❤' +
   '➕-➗➡➰➿⤴-⤵' +
   '⬅-⬇⬛-⬜⭐⭕' +
+  '↩↪' +
   '〰〽㊗㊙'
 );
 
@@ -83,5 +84,3 @@ function buildDiffSegments(text, detections) {
   }
   return segments;
 }
-
-if (typeof module !== 'undefined') module.exports = { detectEmojis, cleanText, buildDiffSegments, EMOJI_RE };

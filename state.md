@@ -1,6 +1,6 @@
 # state.md — icon.no v0
 
-**Actualizado:** 2026-06-02
+**Actualizado:** 2026-06-03
 
 ---
 
@@ -17,31 +17,26 @@
 
 | Archivo | Descripcion |
 |---------|-------------|
-| `index.html` | Entregable final — app completa, single-file, sin deps |
-| `src/engine.js` | Motor de detección (inlineado en index.html) |
-| `src/presets.js` | Modelo de presets (inlineado en index.html) |
-| `tests/engine.test.js` | Tests Node.js del motor — 13 tests |
-| `tests/presets.test.js` | Tests Node.js del modelo de presets — 5 tests |
-| `test-files/` | Archivos de prueba (ignorados en git) |
-| `docs/superpowers/specs/2026-06-02-emoji-cleaner-webapp-design.md` | Spec aprobada |
-| `docs/superpowers/plans/2026-06-02-emoji-cleaner-webapp.md` | Plan de implementación (12 tareas) |
-| `mockups/` | Mockups HTML del proceso de diseño (referencia) |
-| `emoji-cleaner.js` | Script CLI anterior — descartado, no continuar |
+| `index.html` | App — UI completa |
+| `engine.js` | Motor de detección de emojis |
+| `presets.js` | Modelo de presets |
+| `README.md` | — |
+| `.archive/` | CLI anterior, tests, mockups, docs de desarrollo |
 
 ---
 
 ## Decisiones de diseño
 
-- **Un solo archivo HTML** — sin deps externas, sin servidor, funciona offline
+- **Tres archivos en raíz** — `index.html` + `engine.js` + `presets.js`, listo para GitHub Pages
 - **Motor:** rangos Unicode 17.0 portados desde `_EMOJIS` en `icono.py` (líneas 76–104)
 - **Referencia icono.py:** `EMOJI/emoji_scan/icono.py`
 - **Sin toggle de modos** — texto y archivos coexisten como tarjetas en el mismo stack
 - **Presets configurables** — toggleables, editables inline, custom, persisten en localStorage bajo clave `emoji-cleaner-presets`
 - **Presets predefinidos:** Estado (✅ ❌), Semáforo (🟢 🔴 🟡), Alertas (ℹ️ ⚠️), Flechas (➡️ ⬆️ ⬇️ ↩️)
-- **Diff inline** — naranja tachado (eliminar), verde con borde (preservar); toggle diff/resultado en estado preview
-- **Zip writer inline** — implementación propia ~60 líneas, sin deps, para bulk download
+- **Diff inline** — naranja tachado (eliminar), verde con borde (preservar); sin toggle, preview muestra siempre diff
+- **Zip writer inline** — implementación propia ~60 líneas, en index.html, para bulk download
 - **Drag & drop** — archivos soltados se añaden directamente como cards (sin pasar por Añadir)
-- **Nombre:** renombrado a icon.no (título y label de la app)
+- **Scroll-to-top** — botón ▲ fixed bottom-right, aparece al pasar 200px de scroll
 
 ---
 
@@ -52,6 +47,14 @@
 ---
 
 ## History
+
+### 2026-06-03 — Refactor + UX (sesión 3)
+- Motor y presets extraídos de index.html a `engine.js` y `presets.js` en raíz — sin duplicación
+- Archivado en `.archive/`: src/, tests/, docs/, mockups/, test-files/, emoji-cleaner.js, .emoji-cleaner-config.json
+- Estructura lista para GitHub Pages (tres archivos en raíz)
+- Añadido botón scroll-to-top (▲ fixed, aparece al pasar 200px)
+- Eliminado toggle diff/resultado — preview muestra siempre el diff
+- Fix motor: añadidos ↩ (U+21A9) y ↪ (U+21AA) a _BASE_CLASS — ↩️ ahora se detecta
 
 ### 2026-06-02 — Mejoras post-implementación (sesión 2)
 - Copiar disponible también en cards de archivo (antes solo en texto)

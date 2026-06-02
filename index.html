@@ -103,21 +103,6 @@ body {
 /* ── Btn row ── */
 .btn-row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
 
-/* ── Toggle (diff/resultado) ── */
-.view-toggle {
-  display: inline-flex;
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  font-size: 0.66rem;
-  margin-left: auto;
-}
-.view-toggle span {
-  padding: 0.18rem 0.55rem;
-  color: var(--text-faint);
-  cursor: pointer;
-}
-.view-toggle span.active { background: var(--border-2); color: #999; }
 
 /* ── Output area ── */
 .output {
@@ -205,9 +190,36 @@ body {
 
 /* ── Bulk bar ── */
 #bulk-bar { display:flex; gap:0.4rem; flex-wrap:wrap; }
+
+/* ── Scroll-to-top ── */
+#scroll-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 100;
+  font-family: inherit;
+}
+#scroll-top.visible { opacity: 1; pointer-events: auto; }
+#scroll-top:hover { color: var(--text); border-color: #444; }
 </style>
 </head>
 <body>
+<script src="engine.js"></script>
+<script src="presets.js"></script>
 <div class="app">
   <div class="app-name">icon.no</div>
   <div class="panel collapsed" id="config-panel"></div>
@@ -215,6 +227,7 @@ body {
   <div id="bulk-bar" style="display:none"></div>
   <div id="card-stack"></div>
 </div>
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Volver arriba">▲</button>
 <script>
 // ── ZIP writer ────────────────────────────────────────────────────────────────
 function buildZip(files) {
@@ -295,115 +308,6 @@ function crc32(data) {
     for (let i = 0; i < 8; i++) crc = (crc >>> 1) ^ (crc & 1 ? 0xEDB88320 : 0);
   }
   return (crc ^ 0xFFFFFFFF) >>> 0;
-}
-
-// ── Engine (inlined from src/engine.js) ──────────────────────────────────────
-const _BASE_CLASS = (
-  '\u{1F600}-\u{1F64F}' +
-  '\u{1F300}-\u{1F5FF}' +
-  '\u{1F680}-\u{1F6FF}' +
-  '\u{1F700}-\u{1F77F}' +
-  '\u{1F780}-\u{1F7FF}' +
-  '\u{1F800}-\u{1F8FF}' +
-  '\u{1F900}-\u{1F9FF}' +
-  '\u{1FA00}-\u{1FA6F}' +
-  '\u{1FA70}-\u{1FAFF}' +
-  '\u{1F004}-\u{1F1FF}' +
-  '‼⁉ℹ⌨⏏Ⓜ⚧⛈' +
-  '⌚-⌛⏩-⏳⏸-⏺' +
-  '▪-▫▶◀◻-◾' +
-  '☀-☄☎☑☔-☕☘☝' +
-  '☠☢-☣☦☪☮-☯' +
-  '☸-☺♀♂♈-♓' +
-  '♟-♠♣♥-♦♨' +
-  '♻♾-♿⚒-⚗⚙⚛-⚜' +
-  '⚠-⚡⚪-⚫⚰-⚱' +
-  '⚽-⚾⛄-⛅⛎-⛏' +
-  '⛑⛓-⛔⛩-⛪⛰-⛵⛷-⛺⛽' +
-  '✂✅✈-✍✏✒✔✖✝✡✨' +
-  '✳-✴❄❇❌❎❓-❕❗❣-❤' +
-  '➕-➗➡➰➿⤴-⤵' +
-  '⬅-⬇⬛-⬜⭐⭕' +
-  '〰〽㊗㊙'
-);
-
-const SKIN_TONE = '\u{1F3FB}-\u{1F3FF}';
-const VS16      = '️';
-const ZWJ       = '\u{200D}';
-
-const EMOJI_RE = new RegExp(
-  `(?:[${_BASE_CLASS}])` +
-  `(?:[${SKIN_TONE}])?` +
-  `(?:${VS16})?` +
-  `(?:${ZWJ}(?:[${_BASE_CLASS}])(?:[${SKIN_TONE}])?(?:${VS16})?)*`,
-  'gu'
-);
-
-function detectEmojis(text, preserveSet = new Set()) {
-  const results = [];
-  EMOJI_RE.lastIndex = 0;
-  let m;
-  while ((m = EMOJI_RE.exec(text)) !== null) {
-    results.push({
-      start: m.index,
-      end: m.index + m[0].length,
-      emoji: m[0],
-      preserved: preserveSet.has(m[0]) || preserveSet.has(m[0].replace(/️$/, '')),
-    });
-  }
-  return results;
-}
-
-function cleanText(text, preserveSet = new Set()) {
-  const detections = detectEmojis(text, preserveSet);
-  if (detections.length === 0) return text;
-  let result = '';
-  let cursor = 0;
-  for (const d of detections) {
-    result += text.slice(cursor, d.start);
-    if (d.preserved) result += d.emoji;
-    cursor = d.end;
-  }
-  result += text.slice(cursor);
-  return result;
-}
-
-function buildDiffSegments(text, detections) {
-  const segments = [];
-  let cursor = 0;
-  for (const d of detections) {
-    if (d.start > cursor) {
-      segments.push({ type: 'plain', text: text.slice(cursor, d.start) });
-    }
-    segments.push({ type: d.preserved ? 'keep' : 'del', text: d.emoji });
-    cursor = d.end;
-  }
-  if (cursor < text.length) {
-    segments.push({ type: 'plain', text: text.slice(cursor) });
-  }
-  return segments;
-}
-
-// ── Presets (inlined from src/presets.js) ────────────────────────────────────
-const STORAGE_KEY = 'emoji-cleaner-presets';
-const DEFAULT_PRESETS = [
-  { id: 'estado',   name: 'Estado',   emojis: ['✅', '❌'],             enabled: true },
-  { id: 'semaforo', name: 'Semáforo', emojis: ['🟢', '🔴', '🟡'],      enabled: true },
-  { id: 'alertas',  name: 'Alertas',  emojis: ['ℹ️', '⚠️'],            enabled: true },
-  { id: 'flechas',  name: 'Flechas',  emojis: ['➡️', '⬆️', '⬇️', '↩️'], enabled: false },
-];
-function loadPresets() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_PRESETS.map(p => ({ ...p, emojis: [...p.emojis] }));
-    return JSON.parse(raw);
-  } catch { return DEFAULT_PRESETS.map(p => ({ ...p, emojis: [...p.emojis] })); }
-}
-function savePresets(presets) { localStorage.setItem(STORAGE_KEY, JSON.stringify(presets)); }
-function buildPreserveSet(presets) {
-  const set = new Set();
-  for (const p of presets) { if (p.enabled) for (const e of p.emojis) set.add(e); }
-  return set;
 }
 
 // ── App state ─────────────────────────────────────────────────────────────────
@@ -743,7 +647,6 @@ function renderCardBody(card) {
   }
   const showDownload = card.type === 'file' && card.state === 'listo';
   const showCopy    = card.state === 'listo';
-  const showToggle  = card.state === 'preview';
   const previewClass = card.state === 'preview' ? 'btn' : 'btn primary';
   const limpiarClass = card.state === 'preview' ? 'btn primary' : 'btn';
   return `
@@ -753,11 +656,6 @@ function renderCardBody(card) {
       ${showCopy    ? `<button class="btn" id="copy-btn-${card.id}" onclick="copyCard('${card.id}')">Copiar</button>` : ''}
       ${showDownload ? `<button class="btn" onclick="downloadCard('${card.id}')">⬇ Descargar</button>` : ''}
       ${!showCopy && !showDownload ? `<button class="btn" disabled>${card.type === 'text' ? 'Copiar' : '⬇ Descargar'}</button>` : ''}
-      ${showToggle ? `
-        <div class="view-toggle" id="vt-${card.id}">
-          <span class="${card.viewMode === 'resultado' ? '' : 'active'}" onclick="setViewMode('${card.id}','diff')">diff</span>
-          <span class="${card.viewMode === 'resultado' ? 'active' : ''}" onclick="setViewMode('${card.id}','resultado')">resultado</span>
-        </div>` : ''}
     </div>
     <div class="output" id="output-${card.id}">${renderOutput(card)}</div>`;
 }
@@ -766,7 +664,6 @@ function renderOutput(card) {
   if (!card.segments && !card.cleanContent) return '<span style="color:var(--text-faint)">— sin procesar —</span>';
   if (card.state === 'listo') return escapeHtml(card.cleanContent ?? '');
   if (card.state === 'preview') {
-    if (card.viewMode === 'resultado') return escapeHtml(card.cleanContent ?? '');
     return (card.segments ?? []).map(s => {
       if (s.type === 'plain') return escapeHtml(s.text);
       if (s.type === 'keep') return `<span class="keep">${s.text}</span>`;
@@ -788,10 +685,6 @@ function deleteCard(e, id) {
   renderBulkBar();
 }
 
-function setViewMode(id, mode) {
-  cards = cards.map(c => c.id === id ? { ...c, viewMode: mode } : c);
-  renderCards();
-}
 
 // ── Card cycle — text ─────────────────────────────────────────────────────────
 function previewCard(id) {
@@ -804,7 +697,7 @@ function previewCard(id) {
       const detections = detectEmojis(text, preserve);
       const segments = buildDiffSegments(text, detections);
       const cleanContent = cleanText(text, preserve);
-      cards = cards.map(c => c.id === id ? { ...c, state: 'preview', segments, cleanContent, viewMode: 'diff' } : c);
+      cards = cards.map(c => c.id === id ? { ...c, state: 'preview', segments, cleanContent } : c);
       renderCards();
     });
     return;
@@ -816,7 +709,7 @@ function previewCard(id) {
   const segments = buildDiffSegments(text, detections);
   const cleanContent = cleanText(text, preserve);
   cards = cards.map(c => c.id === id
-    ? { ...c, state: 'preview', segments, cleanContent, viewMode: 'diff' }
+    ? { ...c, state: 'preview', segments, cleanContent }
     : c);
   renderCards();
 }
@@ -949,6 +842,9 @@ function downloadReady() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderConfig();
 renderInputZone();
+window.addEventListener('scroll', () => {
+  document.getElementById('scroll-top').classList.toggle('visible', window.scrollY > 200);
+});
 </script>
 </body>
 </html>
