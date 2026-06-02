@@ -2,9 +2,11 @@
 emoji-cleaner.js
 .emoji-cleaner-config.json
 
-# Archivos sueltos de prueba
+# Archivos de prueba
 test.md
 test.txt.md
+test-sample.txt
+test-files/
 
 # Brainstorm sessions
 .superpowers/

@@ -199,6 +199,10 @@ body {
 .card.collapsed .card-body { display:none; }
 .card-body { padding:0.65rem 0.75rem; background:#141414; display:flex; flex-direction:column; gap:0.5rem; }
 
+/* ── Pending files ── */
+.pending-files-list { display:flex; flex-wrap:wrap; gap:0.35rem; padding:0.45rem 0.75rem; border-top:1px solid var(--border-2); background:var(--bg-4); }
+.pf-chip { font-size:0.68rem; color:var(--text-dim); background:var(--bg-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.18rem 0.5rem; font-family:monospace; }
+
 /* ── Bulk bar ── */
 #bulk-bar { display:flex; gap:0.4rem; flex-wrap:wrap; }
 </style>
@@ -543,8 +547,9 @@ function cancelEdit() {
 
 function savePresetEdit(id) {
   const nameEl = document.getElementById(`edit-name-${id}`);
-  const name = nameEl?.value.trim();
-  if (!name) return;
+  const inputName = nameEl?.value?.trim();
+  const fallback = presets.find(p => p.id === id)?.name ?? id;
+  const name = inputName || fallback;
   presets = presets.map(p => p.id === id ? { ...p, name } : p);
   savePresets(presets);
   editingPresetId = null;
@@ -553,8 +558,12 @@ function savePresetEdit(id) {
 }
 
 function saveNewPreset() {
-  const name = document.getElementById('new-preset-name')?.value.trim();
-  if (!name || _newPresetEmojis.length === 0) return;
+  const nameEl = document.getElementById('new-preset-name');
+  const name = nameEl?.value?.trim();
+  if (!name) {
+    if (nameEl) { nameEl.style.outline = '1px solid var(--orange)'; setTimeout(() => { nameEl.style.outline = ''; }, 600); }
+    return;
+  }
   const id = 'custom-' + Date.now();
   presets = [...presets, { id, name, emojis: [..._newPresetEmojis], enabled: true }];
   savePresets(presets);
@@ -630,6 +639,7 @@ function renderInputZone() {
         </label>
       </div>
       <textarea id="text-input" class="text-input" placeholder="Pega aquí..."></textarea>
+      <div id="pending-files"></div>
       <div class="input-zone-footer">
         <button class="btn primary" id="add-btn" onclick="handleAdd()" disabled>Añadir →</button>
       </div>
@@ -642,6 +652,7 @@ function renderInputZone() {
   document.getElementById('file-input').addEventListener('change', (e) => {
     _pendingFiles = Array.from(e.target.files);
     btn.disabled = _pendingFiles.length === 0 && document.getElementById('text-input').value.trim() === '';
+    renderPendingFiles();
   });
 
   const dropZone = document.getElementById('drop-zone');
@@ -651,13 +662,24 @@ function renderInputZone() {
     e.preventDefault();
     e.stopPropagation();
     dropZone.classList.remove('drag-over');
-    _pendingFiles = Array.from(e.dataTransfer.files);
-    btn.disabled = _pendingFiles.length === 0 && document.getElementById('text-input').value.trim() === '';
+    const dropped = Array.from(e.dataTransfer.files);
+    for (const file of dropped) {
+      addCard({ type: 'file', id: 'card-' + Date.now() + '-' + file.name, name: file.name, file, content: null, state: 'pendiente' });
+    }
   });
 
   window.addEventListener('blur', () => {
     document.getElementById('drop-zone')?.classList.remove('drag-over');
   });
+}
+
+function renderPendingFiles() {
+  const el = document.getElementById('pending-files');
+  if (!el) return;
+  if (_pendingFiles.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="pending-files-list">${_pendingFiles.map(f =>
+    `<span class="pf-chip">≡ ${escapeHtml(f.name)}</span>`
+  ).join('')}</div>`;
 }
 
 function handleAdd() {
@@ -679,6 +701,7 @@ function handleAdd() {
   _pendingFiles = [];
   document.getElementById('add-btn').disabled = true;
   document.getElementById('file-input').value = '';
+  renderPendingFiles();
 }
 
 // ── Cards ─────────────────────────────────────────────────────────────────────
