@@ -11,6 +11,9 @@ const _BASE_CLASS = (
   '\u{1FA00}-\u{1FA6F}' +
   '\u{1FA70}-\u{1FAFF}' +
   '\u{1F004}-\u{1F1FF}' +
+  '©®' +           // Copyright, registered U+00A9, U+00AE
+  '™' +            // Trade mark U+2122
+  '↔-↙' +         // Bidirectional/diagonal arrows U+2194-U+2199
   '‼⁉ℹ⌨⏏Ⓜ⚧⛈' +
   '⌚-⌛⏩-⏳⏸-⏺' +
   '▪-▫▶◀◻-◾' +
@@ -37,11 +40,14 @@ const SKIN_TONE = '\u{1F3FB}-\u{1F3FF}';
 const VS16      = '️';
 const ZWJ       = '\u{200D}';
 
+const KEYCAP = '⃣'; // combining enclosing keycap — only valid after 0-9, #, *
+
 const EMOJI_RE = new RegExp(
   `(?:[${_BASE_CLASS}])` +
   `(?:[${SKIN_TONE}])?` +
   `(?:${VS16})?` +
-  `(?:${ZWJ}(?:[${_BASE_CLASS}])(?:[${SKIN_TONE}])?(?:${VS16})?)*`,
+  `(?:${ZWJ}(?:[${_BASE_CLASS}])(?:[${SKIN_TONE}])?(?:${VS16})?)*` +
+  `|[0-9#*]${VS16}?${KEYCAP}`, // keycap sequences: 0️⃣–9️⃣ #️⃣ *️⃣
   'gu'
 );
 

@@ -42,6 +42,9 @@
 
 ## TODO
 
+- [x] Engine: keycap sequences (0️⃣–9️⃣ #️⃣ *️⃣) — fixed with separate EMOJI_RE alternative
+- [x] Engine: ©️ ®️ ™️ ↔️–↙️ — added to _BASE_CLASS
+- [ ] Engine: audit against .archive/emoji-data.txt to find other missing ranges
 - [ ] Feature: "custom delete rules" — user-defined list of characters/patterns to also delete, not just preserve. Currently the user only controls what survives; they have no control over what gets targeted.
 
 ---
