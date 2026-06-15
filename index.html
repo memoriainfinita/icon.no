@@ -668,8 +668,8 @@ function renderOutput(card) {
   if (card.state === 'preview') {
     return (card.segments ?? []).map(s => {
       if (s.type === 'plain') return escapeHtml(s.text);
-      if (s.type === 'keep') return `<span class="keep">${s.text}</span>`;
-      return `<span class="del">${s.text}</span>`;
+      if (s.type === 'keep') return `<span class="keep">${escapeHtml(s.text)}</span>`;
+      return `<span class="del">${escapeHtml(s.text)}</span>`;
     }).join('');
   }
   return '';
