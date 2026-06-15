@@ -50,7 +50,7 @@ last_updated: 2026-06-15
 - [x] Engine: keycap sequences (0️⃣–9️⃣ #️⃣ *️⃣) — fixed with separate EMOJI_RE alternative
 - [x] Engine: ©️ ®️ ™️ ↔️–↙️ — added to _BASE_CLASS
 - [x] Engine: audit against .archive/emoji-data.txt — 100% coverage of Unicode 17.0 Emoji property (1438 cps, 0 missing). Tool: .archive/audit-engine.mjs
-- [ ] Feature: "custom delete rules" — user-defined list of characters/patterns to also delete, not just preserve. Currently the user only controls what survives; they have no control over what gets targeted.
+- [ ] Feature: "custom delete rules" — spec y plan listos y revisados (huecos cerrados). **Próxima sesión: ejecutar el plan inline.** Plan: `docs/superpowers/plans/2026-06-15-custom-delete-rules.md`. Spec: `docs/superpowers/specs/2026-06-15-custom-delete-rules-design.md`. 11 tareas, TDD para engine/persistencia (T1-5), verificación manual en navegador para UI (T6-11).
 
 ---
 
@@ -64,6 +64,9 @@ last_updated: 2026-06-15
 - Añadidas a .archive las referencias de auditoría: emoji-data.txt y emoji-data-limpio.txt
 - Auditoría del motor: 100% de cobertura de la propiedad Emoji de Unicode 17.0 (1438 codepoints, 0 faltantes)
 - Herramienta de auditoría reutilizable creada: .archive/audit-engine.mjs (correr de nuevo con cada versión nueva de Unicode)
+- Diseño feature "custom delete rules": brainstorming + spec + plan completos, con dos rondas de cierre de huecos (spec y plan)
+- Decisión de diseño: lista negra de texto (literal/regex) separada de los presets de preservar; emojis sin cambios; pipeline unificado por máscara de caracteres (analyze) con escapado del diff
+- Pendiente: ejecutar el plan inline en la próxima sesión (ver TODO)
 
 ### 2026-06-03 — Engine coverage cont. (sesión 5)
 - Engine: detect digit/symbol + VS16 without keycap (#️ *️ 0️-9️)
