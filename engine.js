@@ -124,7 +124,37 @@ function applyDeleteRules(text, rules = []) {
   return ranges;
 }
 
+function analyze(text, preserveSet = new Set(), rules = []) {
+  const n = text.length;
+  const mark = new Array(n).fill('plain');
+
+  for (const d of detectEmojis(text, preserveSet)) {
+    const t = d.preserved ? 'keep' : 'del';
+    for (let i = d.start; i < d.end; i++) mark[i] = t;
+  }
+  for (const r of applyDeleteRules(text, rules)) {
+    for (let i = r.start; i < r.end; i++) mark[i] = 'del'; // del overrides keep/plain
+  }
+
+  const segments = [];
+  let i = 0;
+  while (i < n) {
+    const t = mark[i];
+    let j = i;
+    while (j < n && mark[j] === t) j++;
+    segments.push({ type: t, text: text.slice(i, j) });
+    i = j;
+  }
+
+  const cleanContent = segments
+    .filter(s => s.type !== 'del')
+    .map(s => s.text)
+    .join('');
+
+  return { segments, cleanContent };
+}
+
 // Node test harness only; ignored in the browser (no `module`).
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { detectEmojis, cleanText, buildDiffSegments, applyDeleteRules };
+  module.exports = { detectEmojis, cleanText, buildDiffSegments, applyDeleteRules, analyze };
 }
