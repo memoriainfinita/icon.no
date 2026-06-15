@@ -26,7 +26,7 @@ Una regla custom:
 { id, type: 'literal' | 'regex', value, enabled }
 ```
 
-- `id` — generado con `crypto.randomUUID()` al crear la regla.
+- `id` — generado con el patrón de los presets (`'rule-' + Date.now() + sufijo aleatorio`), no `crypto.randomUUID()`: evita la dependencia de *secure context* al abrir la app como `file://`.
 - `type: 'literal'` — borra todas las apariciones exactas de `value`, case-sensitive.
 - `type: 'regex'` — `value` es el cuerpo del patrón, se compila con flags `gu`. Si es inválido, la regla se marca con error y se ignora (no rompe la limpieza).
 - `enabled` — toggle on/off, igual que los presets.
@@ -92,6 +92,8 @@ Las eliminaciones custom se muestran como los emojis a borrar — tachado naranj
 - **Regex catastrófica (ReDoS).** Un patrón válido pero exponencial (`(a+)+$`) sobre texto grande puede congelar la pestaña. Las regex corren en el hilo principal. Decisión: **riesgo aceptado para v1**. Es una app client-side de archivo único; un patrón catastrófico solo afecta la pestaña del propio usuario, que además escribió la regla. No se añade Web Worker con timeout — sobreingeniería para el caso de uso. Documentado aquí como límite conocido.
 - **Regex inválida.** Capturada en `try/catch` al compilar; la regla se marca con error en la UI y se omite en la limpieza.
 - **Valor vacío.** Rechazado en el formulario (ver UI).
+- **Archivos grandes.** `analyze` construye un array de marcas de longitud `text.length`. Para el caso de uso (output de LLM, docs) es irrelevante; en archivos de varios MB el array pesa. Límite conocido, sin paginación en v1.
+- **Valores con comillas en el editor.** Al rellenar el `value` de una regla en un atributo `input value="..."`, se escapan también las comillas dobles (`&quot;`), no solo `& < >`, para no romper el atributo.
 
 ## Decisiones registradas
 

@@ -8,6 +8,8 @@
 
 **Tech Stack:** Vanilla JS single-file web app, browser globals via `<script src>`, Node `assert` tests run with `node tests/<file>.js`. No build step, no dependencies.
 
+> **Line numbers are indicative.** They reflect the file before any task runs; each insertion shifts later numbers. Anchor edits by function name and by the exact block quoted in each step, not by the line number.
+
 ---
 
 ## File Structure
@@ -36,11 +38,11 @@ Append to the end of `engine.js`:
 
 // Node test harness only; ignored in the browser (no `module`).
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { detectEmojis, cleanText, buildDiffSegments, applyDeleteRules, analyze };
+  module.exports = { detectEmojis, cleanText, buildDiffSegments };
 }
 ```
 
-(`applyDeleteRules` and `analyze` are added in Tasks 2–3; referencing them here is fine because the file is only `require`d after they exist. For this task they are `undefined` in the export object, which is acceptable — the Step 3 test does not use them yet.)
+Export only the functions that exist now. `applyDeleteRules` and `analyze` are added to this object in Tasks 2 and 4. (Referencing a not-yet-declared name in the object literal would throw `ReferenceError` the moment the file is `require`d, breaking this task's test.)
 
 - [ ] **Step 2: Write a wiring test**
 
@@ -128,6 +130,12 @@ function applyDeleteRules(text, rules = []) {
   }
   return ranges;
 }
+```
+
+Then add `applyDeleteRules` to the exports object at the end of `engine.js`:
+
+```js
+  module.exports = { detectEmojis, cleanText, buildDiffSegments, applyDeleteRules };
 ```
 
 - [ ] **Step 4: Run to verify pass**
@@ -324,6 +332,14 @@ function analyze(text, preserveSet = new Set(), rules = []) {
 }
 ```
 
+Then add `analyze` to the exports object at the end of `engine.js`:
+
+```js
+  module.exports = { detectEmojis, cleanText, buildDiffSegments, applyDeleteRules, analyze };
+```
+
+Note on performance: `analyze` allocates a mark array of length `text.length`. Fine for the use case (LLM output, docs); multi-MB files are a known limit, not handled in v1.
+
 - [ ] **Step 4: Run to verify pass**
 
 Run: `node tests/engine.test.js`
@@ -358,7 +374,6 @@ global.localStorage = {
   setItem: (k, v) => { store[k] = String(v); },
   removeItem: k => { delete store[k]; },
 };
-global.crypto = { randomUUID: require('crypto').randomUUID };
 
 const { loadDeleteRules, saveDeleteRules, makeRule, isRegexValid, DELETE_RULES_KEY } = require('../delete-rules.js');
 
@@ -418,7 +433,8 @@ function saveDeleteRules(rules) {
 }
 
 function makeRule(type, value) {
-  return { id: crypto.randomUUID(), type, value, enabled: true };
+  const id = 'rule-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  return { id, type, value, enabled: true };
 }
 
 function isRegexValid(value) {
@@ -503,10 +519,10 @@ with:
       return `<span class="del">${escapeHtml(s.text)}</span>`;
 ```
 
-- [ ] **Step 2: Verify (manual)**
+- [ ] **Step 2: Verify no regression (manual)**
 
-Open `index.html`, paste `a <b> 🚀 c` into a text card, click Preview.
-Expected: the literal `<b>` renders as visible text (not an HTML tag), `🚀` is struck through orange. No broken layout.
+Open `index.html`, paste `deploy 🚀 done ✅` (Status preset on) into a text card, click Preview.
+Expected: `🚀` struck orange, `✅` green, surrounding text intact — the emoji diff still renders exactly as before. (The escaping fix only changes behavior when a `del`/`keep` segment contains HTML-special characters, which requires a custom rule; that case is verified end-to-end in Task 11.)
 
 - [ ] **Step 3: Commit**
 
@@ -564,15 +580,41 @@ function renderRuleList() {
 
 function renderRuleRow(r) {
   const invalid = r.type === 'regex' && !isRegexValid(r.value);
+  const isEditing = editingRuleId === r.id;
   return `
     <div class="preset-row ${r.enabled ? 'on' : ''}" id="rule-${r.id}">
       <div class="pr-head">
         <div class="pt ${r.enabled ? 'on' : 'off'}" onclick="toggleRule('${r.id}')"></div>
         <span class="pname">${escapeHtml(r.type)}</span>
         <span class="pemojis ${invalid ? 'rule-invalid' : ''}">${escapeHtml(r.value)}</span>
-        <span class="pedit" onclick="deleteRule('${r.id}')">delete</span>
+        <span class="pedit" onclick="editRule('${r.id}')">edit</span>
       </div>
-      ${invalid ? '<div class="rule-error">invalid regex</div>' : ''}
+      ${invalid && !isEditing ? '<div class="rule-error">invalid regex</div>' : ''}
+      ${isEditing ? renderRuleEditor(r) : ''}
+    </div>`;
+}
+
+function renderRuleEditor(r) {
+  // value goes into an attribute, so escape double quotes too (escapeHtml only does & < >)
+  const attrValue = escapeHtml(r.value).replace(/"/g, '&quot;');
+  return `
+    <div class="pr-edit-body">
+      <div class="edit-row">
+        <span class="edit-label">Type</span>
+        <select class="mock-input" id="edit-rule-type-${r.id}">
+          <option value="literal" ${r.type === 'literal' ? 'selected' : ''}>literal</option>
+          <option value="regex" ${r.type === 'regex' ? 'selected' : ''}>regex</option>
+        </select>
+      </div>
+      <div class="edit-row">
+        <span class="edit-label">Value</span>
+        <input class="mock-input" id="edit-rule-value-${r.id}" value="${attrValue}">
+      </div>
+      <div class="edit-actions">
+        <button class="btn primary" onclick="saveRuleEdit('${r.id}')">Save</button>
+        <button class="btn" onclick="cancelRuleEdit()">Cancel</button>
+        <button class="btn delete-btn" onclick="deleteRule('${r.id}')">Delete rule</button>
+      </div>
     </div>`;
 }
 
@@ -672,17 +714,39 @@ function toggleRule(id) {
 function deleteRule(id) {
   deleteRules = deleteRules.filter(r => r.id !== id);
   saveDeleteRules(deleteRules);
+  editingRuleId = null;
+  invalidatePreviewCards();
+  renderConfig();
+}
+
+function editRule(id) {
+  editingRuleId = editingRuleId === id ? null : id;
+  renderConfig();
+}
+
+function saveRuleEdit(id) {
+  const typeEl = document.getElementById(`edit-rule-type-${id}`);
+  const valueEl = document.getElementById(`edit-rule-value-${id}`);
+  const value = valueEl?.value ?? '';
+  if (!value) {
+    if (valueEl) { valueEl.style.outline = '1px solid var(--orange)'; setTimeout(() => { valueEl.style.outline = ''; }, 600); }
+    return;
+  }
+  const type = typeEl?.value === 'regex' ? 'regex' : 'literal';
+  deleteRules = deleteRules.map(r => r.id === id ? { ...r, type, value } : r);
+  saveDeleteRules(deleteRules);
+  editingRuleId = null;
   invalidatePreviewCards();
   renderConfig();
 }
 ```
 
-Note: `value` is intentionally not trimmed — leading/trailing spaces may be exactly what the user wants to delete. Only fully empty values are rejected.
+Note: `value` is intentionally not trimmed — leading/trailing spaces may be exactly what the user wants to delete. Only fully empty values are rejected. `editingRuleId` is shared between the new-rule form (`'__new__'`) and inline editing of an existing rule (its `id`); they never collide.
 
 - [ ] **Step 2: Verify (manual)**
 
 Open `index.html`, config panel → + new rule → type `literal`, value `--`, Save.
-Expected: a rule row `literal  --` appears with an on-toggle. Reload the page: the rule persists. Toggle it off, reload: stays off. Click delete: it disappears.
+Expected: a rule row `literal  --` appears with an on-toggle. Reload the page: the rule persists. Toggle it off, reload: stays off. Click `edit` → change value to `**` and type to `regex`, Save → the row updates and persists across reload. Click `edit` → `Delete rule`: it disappears.
 
 - [ ] **Step 3: Commit**
 
@@ -808,5 +872,6 @@ git commit -m "docs: update state.md — custom delete rules complete"
 
 ## Self-Review Notes
 
-- **Spec coverage:** literal+regex (T2-T3), per-rule enabled/error (T3, T8), localStorage `[]` default + try/catch + `crypto.randomUUID` (T5), empty-value rejection (T9), delete-wins precedence via mask (T4), unified `analyze` source (T4, T10), diff escaping (T7), UI sub-section mirroring presets (T8-T9), zero-width guard (T3), ReDoS accepted (no task — documented limit). All spec sections map to a task.
-- **Type consistency:** `applyDeleteRules(text, rules)→[{start,end}]`, `analyze(text, preserveSet, rules)→{segments, cleanContent}`, segment `{type:'plain'|'keep'|'del', text}`, rule `{id, type, value, enabled}`, helpers `makeRule(type,value)`, `isRegexValid(value)`, key `DELETE_RULES_KEY` — used consistently across tasks.
+- **Spec coverage:** literal+regex (T2-T3), per-rule enabled/error (T3, T8), localStorage `[]` default + try/catch + `Date.now`-based id (T5), empty-value rejection on add and edit (T9), edit rule inline (T8 `renderRuleEditor`, T9 `editRule`/`saveRuleEdit`), delete-wins precedence via mask (T4), unified `analyze` source (T4, T10), diff escaping incl. attribute-quote escaping in editor (T7, T8), UI sub-section mirroring presets (T8-T9), zero-width guard (T3), large-file + ReDoS accepted (no task — documented limits). All spec sections map to a task.
+- **Type consistency:** `applyDeleteRules(text, rules)→[{start,end}]`, `analyze(text, preserveSet, rules)→{segments, cleanContent}`, segment `{type:'plain'|'keep'|'del', text}`, rule `{id, type, value, enabled}`, helpers `makeRule(type,value)`, `isRegexValid(value)`, key `DELETE_RULES_KEY`, handlers `startNewRule`/`saveNewRule`/`toggleRule`/`deleteRule`/`editRule`/`saveRuleEdit`/`cancelRuleEdit` — used consistently across tasks.
+- **Incremental exports:** engine exports grow per task (T1 three fns → T2 +`applyDeleteRules` → T4 +`analyze`) to avoid `ReferenceError` on `require` mid-plan.
