@@ -1,6 +1,11 @@
+---
+created: 2026-05-12
+last_updated: 2026-06-15
+---
+
 # state.md — icon.no v0
 
-**Actualizado:** 2026-06-03 (sesión 4)
+**Actualizado:** 2026-06-15 (sesión 6)
 
 ---
 
@@ -50,6 +55,13 @@
 ---
 
 ## History
+
+### 2026-06-15 — Verificación funcional (sesión 6)
+- Probada la app en navegador con texto de muestra mixto
+- Confirmada detección correcta: keycaps (1️⃣), ©️ ®️, botón japonés (🈲), letra encerrada (🅰️), decorativos (🚀 🔥 🎉)
+- Confirmada preservación por presets: Estado (✅ ❌) y Semáforo (🟢 🔴) sobreviven; Flechas eliminadas con preset inactivo
+- Sin cambios de código — cobertura de sesiones 4-5 validada
+- Añadidas a .archive las referencias de auditoría: emoji-data.txt y emoji-data-limpio.txt
 
 ### 2026-06-03 — Engine coverage cont. (sesión 5)
 - Engine: detect digit/symbol + VS16 without keycap (#️ *️ 0️-9️)
