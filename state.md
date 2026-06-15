@@ -25,6 +25,8 @@ last_updated: 2026-06-15
 | `index.html` | App — UI completa |
 | `engine.js` | Motor de detección de emojis |
 | `presets.js` | Modelo de presets |
+| `delete-rules.js` | Reglas de borrado custom (literal/regex), persistencia y validación |
+| `tests/` | Tests Node del motor y persistencia (`engine.test.js`, `delete-rules.test.js`) |
 | `README.md` | — |
 | `.archive/` | CLI anterior, tests, mockups, docs de desarrollo |
 
@@ -50,11 +52,19 @@ last_updated: 2026-06-15
 - [x] Engine: keycap sequences (0️⃣–9️⃣ #️⃣ *️⃣) — fixed with separate EMOJI_RE alternative
 - [x] Engine: ©️ ®️ ™️ ↔️–↙️ — added to _BASE_CLASS
 - [x] Engine: audit against .archive/emoji-data.txt — 100% coverage of Unicode 17.0 Emoji property (1438 cps, 0 missing). Tool: .archive/audit-engine.mjs
-- [ ] Feature: "custom delete rules" — spec y plan listos y revisados (huecos cerrados). **Próxima sesión: ejecutar el plan inline.** Plan: `docs/superpowers/plans/2026-06-15-custom-delete-rules.md`. Spec: `docs/superpowers/specs/2026-06-15-custom-delete-rules-design.md`. 11 tareas, TDD para engine/persistencia (T1-5), verificación manual en navegador para UI (T6-11).
+- [x] Feature: "custom delete rules" — implementada (sesión 6). Tests del motor y persistencia pasan; verificación de UI en navegador pendiente de confirmar por el usuario. Plan: `docs/superpowers/plans/2026-06-15-custom-delete-rules.md`. Spec: `docs/superpowers/specs/2026-06-15-custom-delete-rules-design.md`.
 
 ---
 
 ## History
+
+### 2026-06-15 — Custom delete rules (sesión 6)
+- Feature: reglas de borrado custom (lista negra literal/regex), separadas de los presets de preservar
+- engine.js: applyDeleteRules + analyze (pipeline unificado por máscara de caracteres)
+- delete-rules.js: persistencia y validación, espejo de presets.js
+- Fix: renderOutput escapa todos los segmentos del diff (evita inyección de texto custom)
+- Tests: tests/engine.test.js y tests/delete-rules.test.js
+- Verificación de UI en navegador pendiente de confirmar por el usuario
 
 ### 2026-06-15 — Verificación funcional (sesión 6)
 - Probada la app en navegador con texto de muestra mixto
