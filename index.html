@@ -530,6 +530,68 @@ function cancelEdit() {
   renderConfig();
 }
 
+function startNewRule() {
+  editingRuleId = '__new__';
+  renderConfig();
+  setTimeout(() => document.getElementById('new-rule-value')?.focus(), 0);
+}
+
+function cancelRuleEdit() {
+  editingRuleId = null;
+  renderConfig();
+}
+
+function saveNewRule() {
+  const typeEl = document.getElementById('new-rule-type');
+  const valueEl = document.getElementById('new-rule-value');
+  const value = valueEl?.value ?? '';
+  if (!value) {
+    if (valueEl) { valueEl.style.outline = '1px solid var(--orange)'; setTimeout(() => { valueEl.style.outline = ''; }, 600); }
+    return;
+  }
+  deleteRules = [...deleteRules, makeRule(typeEl?.value === 'regex' ? 'regex' : 'literal', value)];
+  saveDeleteRules(deleteRules);
+  editingRuleId = null;
+  invalidatePreviewCards();
+  renderConfig();
+}
+
+function toggleRule(id) {
+  deleteRules = deleteRules.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r);
+  saveDeleteRules(deleteRules);
+  invalidatePreviewCards();
+  renderConfig();
+}
+
+function deleteRule(id) {
+  deleteRules = deleteRules.filter(r => r.id !== id);
+  saveDeleteRules(deleteRules);
+  editingRuleId = null;
+  invalidatePreviewCards();
+  renderConfig();
+}
+
+function editRule(id) {
+  editingRuleId = editingRuleId === id ? null : id;
+  renderConfig();
+}
+
+function saveRuleEdit(id) {
+  const typeEl = document.getElementById(`edit-rule-type-${id}`);
+  const valueEl = document.getElementById(`edit-rule-value-${id}`);
+  const value = valueEl?.value ?? '';
+  if (!value) {
+    if (valueEl) { valueEl.style.outline = '1px solid var(--orange)'; setTimeout(() => { valueEl.style.outline = ''; }, 600); }
+    return;
+  }
+  const type = typeEl?.value === 'regex' ? 'regex' : 'literal';
+  deleteRules = deleteRules.map(r => r.id === id ? { ...r, type, value } : r);
+  saveDeleteRules(deleteRules);
+  editingRuleId = null;
+  invalidatePreviewCards();
+  renderConfig();
+}
+
 function savePresetEdit(id) {
   const nameEl = document.getElementById(`edit-name-${id}`);
   const inputName = nameEl?.value?.trim();
