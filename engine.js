@@ -95,3 +95,8 @@ function buildDiffSegments(text, detections) {
   }
   return segments;
 }
+
+// Node test harness only; ignored in the browser (no `module`).
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { detectEmojis, cleanText, buildDiffSegments };
+}
