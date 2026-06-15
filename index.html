@@ -835,10 +835,7 @@ function previewCard(id) {
 
   if (card.type === 'file' && card.content === null) {
     readFileCard(id, (text) => {
-      const preserve = buildPreserveSet(presets);
-      const detections = detectEmojis(text, preserve);
-      const segments = buildDiffSegments(text, detections);
-      const cleanContent = cleanText(text, preserve);
+      const { segments, cleanContent } = analyze(text, buildPreserveSet(presets), deleteRules);
       cards = cards.map(c => c.id === id ? { ...c, state: 'preview', segments, cleanContent } : c);
       renderCards();
     });
@@ -846,10 +843,7 @@ function previewCard(id) {
   }
 
   const text = card.content ?? '';
-  const preserve = buildPreserveSet(presets);
-  const detections = detectEmojis(text, preserve);
-  const segments = buildDiffSegments(text, detections);
-  const cleanContent = cleanText(text, preserve);
+  const { segments, cleanContent } = analyze(text, buildPreserveSet(presets), deleteRules);
   cards = cards.map(c => c.id === id
     ? { ...c, state: 'preview', segments, cleanContent }
     : c);
@@ -862,9 +856,8 @@ function cleanCard(id) {
 
   if (card.type === 'file' && card.content === null) {
     readFileCard(id, (text) => {
-      const preserve = buildPreserveSet(presets);
-      const clean = cleanText(text, preserve);
-      cards = cards.map(c => c.id === id ? { ...c, content: text, cleanContent: clean, state: 'done', segments: null } : c);
+      const { cleanContent } = analyze(text, buildPreserveSet(presets), deleteRules);
+      cards = cards.map(c => c.id === id ? { ...c, content: text, cleanContent, state: 'done', segments: null } : c);
       renderCards();
       renderBulkBar();
     });
@@ -872,9 +865,8 @@ function cleanCard(id) {
   }
 
   const text = card.content ?? '';
-  const preserve = buildPreserveSet(presets);
-  const clean = cleanText(text, preserve);
-  cards = cards.map(c => c.id === id ? { ...c, cleanContent: clean, state: 'done', segments: null } : c);
+  const { cleanContent } = analyze(text, buildPreserveSet(presets), deleteRules);
+  cards = cards.map(c => c.id === id ? { ...c, cleanContent, state: 'done', segments: null } : c);
   renderCards();
   renderBulkBar();
 }
