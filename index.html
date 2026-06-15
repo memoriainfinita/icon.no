@@ -139,6 +139,9 @@ body {
 .pedit:hover { color: var(--text-dim); }
 .add-preset-btn { font-size:0.7rem; color:var(--text-faint); cursor:pointer; padding:0.25rem 0.5rem; border:1px dashed var(--border-2); border-radius:5px; text-align:center; margin-top:0.3rem; }
 .add-preset-btn:hover { color: var(--text-dim); border-color: var(--border); }
+.rules-divider { margin-top: 1rem; padding-top: 0.6rem; border-top: 1px solid var(--border, #333); font-size: 0.75rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; }
+.rule-invalid { text-decoration: line-through; opacity: 0.6; }
+.rule-error { font-size: 0.7rem; color: var(--orange); padding: 0 0.6rem 0.4rem; }
 
 /* Preset editor */
 .pr-edit-body { padding:0.6rem 0.6rem; background:#121212; border-top:1px solid var(--border-2); display:flex; flex-direction:column; gap:0.5rem; }
@@ -336,8 +339,12 @@ function renderConfig() {
     <div class="panel-body">
       <div id="preset-list"></div>
       <div class="add-preset-btn" onclick="startNewPreset()">+ new preset</div>
+      <div class="rules-divider">Delete rules</div>
+      <div id="rule-list"></div>
+      <div class="add-preset-btn" onclick="startNewRule()">+ new rule</div>
     </div>`;
   renderPresetList();
+  renderRuleList();
 }
 
 function toggleConfig() {
@@ -365,6 +372,78 @@ function renderPresetRow(p) {
         <span class="pedit" onclick="editPreset('${p.id}')">edit</span>
       </div>
       ${isEditing ? renderPresetEditor(p) : ''}
+    </div>`;
+}
+
+function renderRuleList() {
+  const list = document.getElementById('rule-list');
+  if (!list) return;
+  list.innerHTML = deleteRules.map(r => renderRuleRow(r)).join('');
+  if (editingRuleId === '__new__') {
+    list.innerHTML += renderNewRuleForm();
+  }
+}
+
+function renderRuleRow(r) {
+  const invalid = r.type === 'regex' && !isRegexValid(r.value);
+  const isEditing = editingRuleId === r.id;
+  return `
+    <div class="preset-row ${r.enabled ? 'on' : ''}" id="rule-${r.id}">
+      <div class="pr-head">
+        <div class="pt ${r.enabled ? 'on' : 'off'}" onclick="toggleRule('${r.id}')"></div>
+        <span class="pname">${escapeHtml(r.type)}</span>
+        <span class="pemojis ${invalid ? 'rule-invalid' : ''}">${escapeHtml(r.value)}</span>
+        <span class="pedit" onclick="editRule('${r.id}')">edit</span>
+      </div>
+      ${invalid && !isEditing ? '<div class="rule-error">invalid regex</div>' : ''}
+      ${isEditing ? renderRuleEditor(r) : ''}
+    </div>`;
+}
+
+function renderRuleEditor(r) {
+  // value goes into an attribute, so escape double quotes too (escapeHtml only does & < >)
+  const attrValue = escapeHtml(r.value).replace(/"/g, '&quot;');
+  return `
+    <div class="pr-edit-body">
+      <div class="edit-row">
+        <span class="edit-label">Type</span>
+        <select class="mock-input" id="edit-rule-type-${r.id}">
+          <option value="literal" ${r.type === 'literal' ? 'selected' : ''}>literal</option>
+          <option value="regex" ${r.type === 'regex' ? 'selected' : ''}>regex</option>
+        </select>
+      </div>
+      <div class="edit-row">
+        <span class="edit-label">Value</span>
+        <input class="mock-input" id="edit-rule-value-${r.id}" value="${attrValue}">
+      </div>
+      <div class="edit-actions">
+        <button class="btn primary" onclick="saveRuleEdit('${r.id}')">Save</button>
+        <button class="btn" onclick="cancelRuleEdit()">Cancel</button>
+        <button class="btn delete-btn" onclick="deleteRule('${r.id}')">Delete rule</button>
+      </div>
+    </div>`;
+}
+
+function renderNewRuleForm() {
+  return `
+    <div class="preset-row new-preset">
+      <div class="pr-edit-body">
+        <div class="edit-row">
+          <span class="edit-label">Type</span>
+          <select class="mock-input" id="new-rule-type">
+            <option value="literal">literal</option>
+            <option value="regex">regex</option>
+          </select>
+        </div>
+        <div class="edit-row">
+          <span class="edit-label">Value</span>
+          <input class="mock-input" id="new-rule-value" placeholder="text or pattern">
+        </div>
+        <div class="edit-actions">
+          <button class="btn primary" onclick="saveNewRule()">Save</button>
+          <button class="btn" onclick="cancelRuleEdit()">Cancel</button>
+        </div>
+      </div>
     </div>`;
 }
 
