@@ -52,7 +52,7 @@ last_updated: 2026-06-15
 - [x] Engine: keycap sequences (0️⃣–9️⃣ #️⃣ *️⃣) — fixed with separate EMOJI_RE alternative
 - [x] Engine: ©️ ®️ ™️ ↔️–↙️ — added to _BASE_CLASS
 - [x] Engine: audit against .archive/emoji-data.txt — 100% coverage of Unicode 17.0 Emoji property (1438 cps, 0 missing). Tool: .archive/audit-engine.mjs
-- [x] Feature: "custom delete rules" — implementada (sesión 6). Tests del motor y persistencia pasan; verificación de UI en navegador pendiente de confirmar por el usuario. Plan: `docs/superpowers/plans/2026-06-15-custom-delete-rules.md`. Spec: `docs/superpowers/specs/2026-06-15-custom-delete-rules-design.md`.
+- [x] Feature: "custom delete rules" — implementada y verificada en navegador (sesión 6). Tests del motor y persistencia pasan; UI confirmada funcional por el usuario. Plan: `docs/superpowers/plans/2026-06-15-custom-delete-rules.md`. Spec: `docs/superpowers/specs/2026-06-15-custom-delete-rules-design.md`.
 
 ---
 
@@ -64,7 +64,7 @@ last_updated: 2026-06-15
 - delete-rules.js: persistencia y validación, espejo de presets.js
 - Fix: renderOutput escapa todos los segmentos del diff (evita inyección de texto custom)
 - Tests: tests/engine.test.js y tests/delete-rules.test.js
-- Verificación de UI en navegador pendiente de confirmar por el usuario
+- UI verificada en navegador por el usuario: render, handlers, persistencia y escapado del diff funcionan
 
 ### 2026-06-15 — Verificación funcional (sesión 6)
 - Probada la app en navegador con texto de muestra mixto
