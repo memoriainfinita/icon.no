@@ -96,7 +96,22 @@ function buildDiffSegments(text, detections) {
   return segments;
 }
 
+function applyDeleteRules(text, rules = []) {
+  const ranges = [];
+  for (const rule of rules) {
+    if (!rule.enabled || !rule.value) continue;
+    if (rule.type === 'literal') {
+      let idx = 0;
+      while ((idx = text.indexOf(rule.value, idx)) !== -1) {
+        ranges.push({ start: idx, end: idx + rule.value.length });
+        idx += rule.value.length;
+      }
+    }
+  }
+  return ranges;
+}
+
 // Node test harness only; ignored in the browser (no `module`).
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { detectEmojis, cleanText, buildDiffSegments };
+  module.exports = { detectEmojis, cleanText, buildDiffSegments, applyDeleteRules };
 }
