@@ -217,6 +217,7 @@ body {
 </style>
 <script src="engine.js"></script>
 <script src="presets.js"></script>
+<script src="delete-rules.js"></script>
 </head>
 <body>
 <div class="app">
@@ -315,6 +316,8 @@ let editingPresetId = null;
 let cards = [];
 let _newPresetEmojis = [];
 let _pendingFiles = [];
+let deleteRules = loadDeleteRules();
+let editingRuleId = null;
 
 // Helpers
 function escapeHtml(str) {
