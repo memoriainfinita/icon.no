@@ -106,6 +106,19 @@ function applyDeleteRules(text, rules = []) {
         ranges.push({ start: idx, end: idx + rule.value.length });
         idx += rule.value.length;
       }
+    } else if (rule.type === 'regex') {
+      let re;
+      try {
+        re = new RegExp(rule.value, 'gu');
+      } catch {
+        continue; // invalid pattern: skip this rule
+      }
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(text)) !== null) {
+        if (m[0].length === 0) { re.lastIndex++; continue; } // zero-width guard
+        ranges.push({ start: m.index, end: m.index + m[0].length });
+      }
     }
   }
   return ranges;
