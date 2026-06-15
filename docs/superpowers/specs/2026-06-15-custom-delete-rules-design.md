@@ -26,10 +26,14 @@ Una regla custom:
 { id, type: 'literal' | 'regex', value, enabled }
 ```
 
+- `id` — generado con `crypto.randomUUID()` al crear la regla.
 - `type: 'literal'` — borra todas las apariciones exactas de `value`, case-sensitive.
 - `type: 'regex'` — `value` es el cuerpo del patrón, se compila con flags `gu`. Si es inválido, la regla se marca con error y se ignora (no rompe la limpieza).
 - `enabled` — toggle on/off, igual que los presets.
 - Persisten en localStorage bajo clave nueva `emoji-cleaner-delete-rules`, separada de los presets.
+- Default: lista vacía `[]`. No hay reglas predefinidas — son inherentemente del usuario.
+
+`loadDeleteRules` / `saveDeleteRules` replican el patrón de `loadPresets` / `savePresets` (presets.js): `try/catch` en la lectura con fallback a `[]` si el JSON está corrupto.
 
 ## Comportamiento y precedencia
 
@@ -45,29 +49,54 @@ Nueva sección en el panel de config, debajo de los presets, con el patrón visu
 - Formulario inline para añadir: campo de texto + selector literal/regex + botón añadir.
 - Regla regex inválida: marca de error (borde/color) + texto breve; desactivada de facto hasta corregirla.
 - Sin nombre: el propio `value` es la etiqueta (una regla = una entrada, no un grupo).
+- Validación al añadir/editar: se rechaza `value` vacío (tanto literal como regex). Una regla literal vacía casaría en todas partes o en ninguna; una regex vacía no tiene sentido.
 
 Strings en inglés, siguiendo el i18n de la sesión 4.
 
 ## Pipeline y diff
 
-Orden de pasadas sobre cada texto:
+### Fuente única: `analyze(text, preserveSet, rules)`
 
-1. Detección de emojis (motor actual) — marca qué borrar/preservar.
-2. Reglas de borrado custom — marca rangos adicionales a borrar.
-3. Fusión de todas las marcas en una lista de segmentos ordenada por posición.
-4. Render del diff + texto limpio en una pasada.
+Hoy hay doble pasada inconsistente: `cleanText` (engine.js:69) vuelve a llamar a `detectEmojis` por su cuenta, separado de `buildDiffSegments`. Con reglas custom, diff y output podrían divergir.
 
-Detalles:
+Se reemplaza por una función única `analyze(text, preserveSet, rules)` que devuelve `{ segments, cleanContent }` de una sola pasada. El diff y el texto limpio salen de la misma fuente, garantizando que coincidan. Los call sites (`previewCard`, `cleanCard`, `previewAll`, `processAll`) la consumen.
 
-- Diff visual: las eliminaciones custom se muestran como los emojis a borrar — tachado naranja. Preservado en verde.
-- Solapamiento de rangos: quedarse con la unión de rangos a borrar, evitando segmentos duplicados, para que el diff no se rompa.
+### Algoritmo por máscara de caracteres
 
-## Función nueva en engine.js
+Evita recortar intervalos solapados. Sobre una máscara `mark[]` de longitud `text.length` (índices de code unit, igual que `slice`):
 
-`applyDeleteRules(text, rules)` devuelve rangos `{start, end}` en el mismo formato que `detectEmojis`, para que el código de diff existente los consuma sin cambios estructurales.
+1. Init todas las posiciones a `'plain'`.
+2. Detecciones de emoji (`detectEmojis(text, preserveSet)`): marcar cada posición del emoji como `'keep'` si `preserved`, si no `'del'`.
+3. Reglas de borrado: por cada match, marcar sus posiciones como `'del'`. **`del` sobrescribe `keep`** → resuelve la precedencia "delete gana sobre preserve" sin lógica extra.
+4. Agrupar runs contiguos de la misma marca en segmentos `{ type, text }`.
+5. `cleanContent` = concatenación de los caracteres cuya marca no es `'del'`.
+
+Esto resuelve de un golpe: solapamiento entre reglas, solapamiento regla-emoji, precedencia, duplicados de segmento, y la sincronía diff/output. Coste O(n) en memoria sobre el texto, aceptable para el caso de uso.
+
+### Escapado del diff (corrige hueco actual)
+
+El render actual (`index.html:667-669`) solo escapa los segmentos `plain`; inyecta `del`/`keep` crudos en `innerHTML`. Con emojis es inocuo, pero las reglas custom meten texto arbitrario en segmentos `del`: `<div>`, `&`, `<script>` romperían el render o abrirían XSS sobre el texto pegado. `renderOutput` debe escapar **todos** los segmentos (`escapeHtml` sobre un emoji es no-op).
+
+### Diff visual
+
+Las eliminaciones custom se muestran como los emojis a borrar — tachado naranja (`.del`). Preservado en verde (`.keep`). Un solo lenguaje visual: "esto se va", sin importar si era emoji o texto.
+
+## Funciones en engine.js
+
+- `applyDeleteRules(text, rules)` — ejecuta las reglas habilitadas y devuelve rangos `{ start, end }`. Para `regex`, compila con `gu` dentro de `try/catch`; si lanza, omite la regla. El bucle de matching **salta matches de ancho cero** avanzando `lastIndex` manualmente, para no colgar en bucle infinito (ver Robustez).
+- `analyze(text, preserveSet, rules)` — orquesta el algoritmo por máscara descrito arriba. Sustituye el uso directo de `cleanText` + `buildDiffSegments` en los call sites. `cleanText` y `buildDiffSegments` se mantienen o se pliegan dentro de `analyze` según convenga en el plan; lo que importa es que exista una sola fuente.
+
+## Robustez
+
+- **Match de ancho cero.** Una regex válida puede casar cadena vacía (`a*`, `^`, lookahead). Con flag `g` y `lastIndex`, un match vacío que no avanza el cursor cuelga el navegador. Mitigación: en `applyDeleteRules`, si `match[0]` tiene longitud 0, no se marca nada y se avanza `lastIndex` en 1.
+- **Regex catastrófica (ReDoS).** Un patrón válido pero exponencial (`(a+)+$`) sobre texto grande puede congelar la pestaña. Las regex corren en el hilo principal. Decisión: **riesgo aceptado para v1**. Es una app client-side de archivo único; un patrón catastrófico solo afecta la pestaña del propio usuario, que además escribió la regla. No se añade Web Worker con timeout — sobreingeniería para el caso de uso. Documentado aquí como límite conocido.
+- **Regex inválida.** Capturada en `try/catch` al compilar; la regla se marca con error en la UI y se omite en la limpieza.
+- **Valor vacío.** Rechazado en el formulario (ver UI).
 
 ## Decisiones registradas
 
 - Pasada separada en vez de integrar reglas en el regex de emojis: emojis y texto arbitrario son dominios distintos; mezclarlos ensucia el motor.
+- Pipeline unificado por máscara de caracteres con fuente única `analyze()`, en vez de fusionar listas de intervalos: evita recortar solapamientos y garantiza diff = output.
 - Items individuales en la UI en vez de un único textarea con una regla por línea.
+- ReDoS: riesgo aceptado en v1, sin Web Worker.
 - Emojis sin cambios: el default borrar-todo se mantiene porque en output de LLM los decorativos son infinitos e impredecibles y los funcionales son pocos y estables (lista blanca corta).
