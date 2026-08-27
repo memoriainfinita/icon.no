@@ -13,3 +13,9 @@ test-files/
 
 # Node
 node_modules/
+
+# Project archive
+.archive/
+
+# Session state
+state.md
