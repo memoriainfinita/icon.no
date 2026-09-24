@@ -2,7 +2,7 @@
 
 Removes decorative emojis from LLM output. Keeps the ones that mean something.
 
-Paste text or drop files. Preview what gets removed. Download clean versions.
+**[Open it](https://memoriainfinita.github.io/icon.no/)** and paste text or drop files. Preview what gets removed. Download clean versions.
 
 ![icon.no previewing an LLM report: decorative emojis marked for removal, the ones that carry meaning kept](docs/icon.no-demo.png)
 
